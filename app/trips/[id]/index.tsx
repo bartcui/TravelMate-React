@@ -1,4 +1,3 @@
-// app/trips/[id]/index.tsx
 import React, { useEffect, useMemo } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -7,10 +6,8 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
 import { useRouter } from "expo-router";
-
+const router = useRouter();
 export default function TripDetailsScreen() {
-  const router = useRouter();
-
   const scheme = useColorScheme();
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
@@ -36,20 +33,20 @@ export default function TripDetailsScreen() {
     const end = item.endAt ? new Date(item.endAt) : null;
 
     return (
+      <Pressable onPress={() => router.push(`/trips/${trip.id}/steps/${item.id}/edit`)}>
         <View style={styles(t).stepCard}>
-        <Text style={styles(t).stepTitle}>{item.title || "Untitled step"}</Text>
-        {(start || end) && (
+          <Text style={styles(t).stepTitle}>{item.title || "Untitled step"}</Text>
+          {(start || end) && (
             <Text style={styles(t).stepDate}>
-            {start ? start.toDateString() : "—"}
-            {end ? ` – ${end.toDateString()}` : ""}
+              {start ? start.toDateString() : "—"}
+              {end ? ` – ${end.toDateString()}` : ""}
             </Text>
-        )}
-        {!!item.note && <Text style={styles(t).stepNote}>{item.note}</Text>}
+          )}
+          {!!item.note && <Text style={styles(t).stepNote}>{item.note}</Text>}
         </View>
+      </Pressable>
     );
-    };
-
-
+  };
 
   const Header = () => (
     <View>

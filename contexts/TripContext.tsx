@@ -47,6 +47,8 @@ type TripContextValue = {
   addStep: (tripId: string, step: Omit<TripStep, "id" | "tripId">) => string;
   removeTrip: (id: string) => void;
   getTripById: (id: string) => Trip | undefined;
+  updateStep: (tripId: string, stepId: string, patch: Partial<Omit<TripStep, "id" | "tripId">>) => void;
+  removeStep: (tripId: string, stepId: string) => void;
   // convenience selectors
   pastTrips: Trip[];
   currentTrips: Trip[];
@@ -94,6 +96,26 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const pastTrips   = useMemo(() => trips.filter((t) => getTripStatus(t) === "past"), [trips]);
   const currentTrips= useMemo(() => trips.filter((t) => getTripStatus(t) === "current"), [trips]);
   const futureTrips = useMemo(() => trips.filter((t) => getTripStatus(t) === "future"), [trips]);
+  const updateStep: TripContextValue["updateStep"] = (tripId, stepId, patch) => {
+    setTrips(prev =>
+      prev.map(t => {
+        if (t.id !== tripId) return t;
+        return {
+          ...t,
+          steps: t.steps.map(s => (s.id === stepId ? { ...s, ...patch } : s)),
+        };
+      })
+    );
+  };
+
+  const removeStep: TripContextValue["removeStep"] = (tripId, stepId) => {
+    setTrips(prev =>
+      prev.map(t => {
+        if (t.id !== tripId) return t;
+        return { ...t, steps: t.steps.filter(s => s.id !== stepId) };
+      })
+    );
+  };
 
   const value: TripContextValue = {
     trips,
@@ -105,6 +127,8 @@ export const TripProvider: React.FC<{ children: React.ReactNode }> = ({ children
     pastTrips,
     currentTrips,
     futureTrips,
+    updateStep,
+    removeStep,
   };
 
   return <TripContext.Provider value={value}>{children}</TripContext.Provider>;
