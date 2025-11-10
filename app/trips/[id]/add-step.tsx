@@ -1,4 +1,3 @@
-// app/trips/[id]/add-step.tsx
 import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, Switch, Platform, Alert, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -7,6 +6,7 @@ import { useTrips } from "../../../contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
+import { useNavigation } from "expo-router";
 
 function toISO(d: Date | null) {
   return d ? d.toISOString() : undefined;
@@ -44,6 +44,12 @@ export default function AddStepScreen() {
   const durationDays = useMemo(() => diffDays(start, end), [start, end]);
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
 
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    navigation.setOptions({ title: "" }); 
+  }, [navigation]);
+
   const onSubmit = () => {
     if (!canSubmit) {
       Alert.alert("Missing info", "Please add at least the place name and a start date.");
@@ -78,7 +84,7 @@ export default function AddStepScreen() {
       {/* Place name */}
       <Text style={gs.label}>City / Attraction</Text>
       <TextInput
-        placeholder="e.g., Tokyo Skytree"
+        placeholder="Main destination"
         value={place}
         onChangeText={setPlace}
         style={gs.input}
@@ -103,7 +109,7 @@ export default function AddStepScreen() {
       {/* Where to stay */}
       <Text style={gs.label}>Where to stay</Text>
       <TextInput
-        placeholder="Hotel / Hostel / Neighborhood"
+        placeholder="Hotel / Hostel / Airbnb"
         value={whereStay}
         onChangeText={setWhereStay}
         style={gs.input}
@@ -113,7 +119,7 @@ export default function AddStepScreen() {
       {/* Things to see & do */}
       <Text style={gs.label}>Things to see & do</Text>
       <TextInput
-        placeholder="Bullet points or comma-separated list"
+        placeholder="..."
         value={things}
         onChangeText={setThings}
         style={[gs.input, { height: 100 }]}

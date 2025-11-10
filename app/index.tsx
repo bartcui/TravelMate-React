@@ -6,6 +6,7 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../styles/colors";
 import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
+import { useUser, AVATARS } from "../contexts/UserContext";
 
 export default function HomeScreen() {
   const scheme = useColorScheme();
@@ -15,6 +16,9 @@ export default function HomeScreen() {
   const router = useRouter();
   const { trips } = useTrips();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const { profile } = useUser();
+  const displayName = profile?.name || "Traveler";
+  const avatarUri = profile ? AVATARS[profile.avatarId] : "https://i.pravatar.cc/100?img=12";
 
   const sortedTrips = useMemo(() => {
     // sort most recent startDate first; fallback to name
@@ -47,13 +51,10 @@ export default function HomeScreen() {
       {/* Header: avatar + name + settings */}
       <View style={styles(t).headerRow}>
         <View style={styles(t).profileRow}>
-          <Image
-            source={{ uri: "https://i.pravatar.cc/100?img=12" }}
-            style={styles(t).avatar}
-          />
+          <Image source={{ uri: avatarUri }} style={styles(t).avatar} />
           <View>
             <Text style={styles(t).hello}>Hello,</Text>
-            <Text style={styles(t).name}>Bart</Text>
+            <Text style={styles(t).name}>{displayName}</Text>
           </View>
         </View>
 
@@ -75,7 +76,7 @@ export default function HomeScreen() {
         keyExtractor={(tr) => tr.id}
         renderItem={renderTrip}
         contentContainerStyle={{ paddingBottom: 40 }}
-        ListEmptyComponent={<Text style={styles(t).empty}>No trips yet. Tap “Add Trip”.</Text>}
+        ListEmptyComponent={<Text style={styles(t).empty}>Your travel story starts here. Tap “Add Trip”.</Text>}
       />
 
       {/* Add Trip Type Picker (Past / Current / Future) */}
@@ -87,7 +88,7 @@ export default function HomeScreen() {
       >
         <View style={styles(t).modalBackdrop}>
           <View style={styles(t).modalCard}>
-            <Text style={styles(t).modalTitle}>What kind of trip?</Text>
+            <Text style={styles(t).modalTitle}>When is the trip?</Text>
             <Pressable
               style={styles(t).modalBtn}
               onPress={() => {

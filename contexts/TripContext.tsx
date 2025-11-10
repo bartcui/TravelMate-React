@@ -19,8 +19,8 @@ export type Trip = {
   id: string;
   name: string;
   summary?: string;
-  startDate?: string;         // ISO (YYYY-MM-DD) or full ISO timestamp
-  endDate?: string | null;    // null = “I don’t know yet”
+  startDate?: string;         
+  endDate?: string | null;   
   privacy: TripPrivacy;
   trackerEnabled: boolean;    
   steps: TripStep[];

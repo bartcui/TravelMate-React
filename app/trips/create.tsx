@@ -68,7 +68,7 @@ export default function CreateTripScreen() {
       {/* Name */}
       <Text style={gs.label}>Trip name</Text>
       <TextInput
-        placeholder="e.g., Alps 2026"
+        placeholder="e.g. Toronto 2025"
         value={name}
         onChangeText={setName}
         style={gs.input}

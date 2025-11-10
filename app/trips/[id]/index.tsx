@@ -6,6 +6,7 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
 import { useRouter } from "expo-router";
+import { Alert } from "react-native";
 const router = useRouter();
 export default function TripDetailsScreen() {
   const scheme = useColorScheme();
@@ -72,13 +73,43 @@ export default function TripDetailsScreen() {
       </Pressable>
     </View>
   );
-
+  const { removeTrip } = useTrips();
+  const router = useRouter();
   const Footer = () => (
-    <View style={[styles(t).markerRow, { marginTop: 12 }]}>
-      <Text style={styles(t).icon}>🏁</Text>
-      <Text style={styles(t).markerText}>
-        Trip finishes {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
-      </Text>
+    <View>
+      <View style={[styles(t).markerRow, { marginTop: 12 }]}>
+        <Text style={styles(t).icon}>🏁</Text>
+        <Text style={styles(t).markerText}>
+          Trip finishes {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
+        </Text>
+      </View>
+
+      {/* Edit / Delete buttons */}
+      <Pressable
+        style={gs.primaryButton}
+        onPress={() => router.push(`/trips/${trip.id}/edit`)}
+      >
+        <Text style={gs.primaryButtonText}>Save / Edit Trip</Text>
+      </Pressable>
+
+      <Pressable
+        style={[gs.primaryButton, { backgroundColor: "#eb5757", marginTop: 8 }]}
+        onPress={() => {
+          Alert.alert("Delete this trip?", "This cannot be undone.", [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => {
+                removeTrip(trip.id);     // <-- from TripContext
+                router.replace("/");     // go back to Home
+              },
+            },
+          ]);
+        }}
+      >
+        <Text style={gs.primaryButtonText}>Delete Trip</Text>
+      </Pressable>
     </View>
   );
 

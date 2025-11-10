@@ -1,3 +1,4 @@
+// app/trips/[id]/steps/[stepId]/edit.tsx
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, Alert, Platform } from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -21,31 +22,37 @@ export default function EditStepScreen() {
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
 
+  // Look up trip & step (pure values; no early returns!)
   const trip = getTripById(id!);
   const step = useMemo(() => trip?.steps.find(s => s.id === stepId), [trip, stepId]);
 
-  if (!trip) return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
-  if (!step) return <Text style={{ padding: 16, color: t.text }}>Step not found.</Text>;
-
-  const [place, setPlace] = useState(step.title ?? "");
-  const [whereStay, setWhereStay] = useState(() => {
-    const m = step.note?.split("\n").find(l => l.toLowerCase().startsWith("stay:"));
-    return m ? m.replace(/^stay:\s*/i, "") : "";
-  });
-  const [things, setThings] = useState(() => {
-    const m = step.note?.split("\n").find(l => l.toLowerCase().startsWith("to do:"));
-    return m ? m.replace(/^to do:\s*/i, "") : "";
-  });
-
-  const [start, setStart] = useState<Date | null>(parseISO(step.visitedAt as any));
-  const [end, setEnd] = useState<Date | null>(parseISO((step as any).endAt));
+  // Local state: initialize with safe defaults; then hydrate from `step` in an effect
+  const [place, setPlace] = useState("");
+  const [whereStay, setWhereStay] = useState("");
+  const [things, setThings] = useState("");
+  const [start, setStart] = useState<Date | null>(null);
+  const [end, setEnd] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
 
+  // Hydrate state whenever `step` changes (first load or edit another step)
+  useEffect(() => {
+    if (!step) return;
+    setPlace(step.title ?? "");
+    const stayLine = step.note?.split("\n").find(l => l.toLowerCase().startsWith("stay:")) ?? "";
+    const todoLine = step.note?.split("\n").find(l => l.toLowerCase().startsWith("to do:")) ?? "";
+    setWhereStay(stayLine.replace(/^stay:\s*/i, ""));
+    setThings(todoLine.replace(/^to do:\s*/i, ""));
+    setStart(parseISO(step.visitedAt as any));
+    setEnd(parseISO((step as any).endAt));
+  }, [step]);
+
+  // Keep title updated
   useEffect(() => {
     navigation.setOptions({ title: place || "Edit Step" });
   }, [navigation, place]);
 
   const onSave = () => {
+    if (!trip || !step) return; // nothing to save if they don't exist
     if (!place.trim() || !start) {
       Alert.alert("Missing info", "Place and start date are required.");
       return;
@@ -66,6 +73,7 @@ export default function EditStepScreen() {
   };
 
   const onDelete = () => {
+    if (!trip || !step) return;
     Alert.alert("Delete step?", "This cannot be undone.", [
       { text: "Cancel", style: "cancel" },
       {
@@ -78,6 +86,22 @@ export default function EditStepScreen() {
       },
     ]);
   };
+
+  // Render fallbacks instead of early-returns to preserve hook order
+  if (!trip) {
+    return (
+      <View style={[gs.screen, { justifyContent: "center" }]}>
+        <Text style={gs.label}>Trip not found.</Text>
+      </View>
+    );
+  }
+  if (!step) {
+    return (
+      <View style={[gs.screen, { justifyContent: "center" }]}>
+        <Text style={gs.label}>Step not found (it may have been deleted).</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={gs.screen}>
