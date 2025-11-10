@@ -1,4 +1,3 @@
-// app/trips/[id]/add-step.tsx
 import React, { useMemo, useState } from "react";
 import { View, Text, TextInput, Pressable, Switch, Platform, Alert, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -7,6 +6,8 @@ import { useTrips } from "../../../contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
+import { useNavigation } from "expo-router";
+import { geocodePlace } from "../../../utils/geocode";
 
 function toISO(d: Date | null) {
   return d ? d.toISOString() : undefined;
@@ -44,10 +45,35 @@ export default function AddStepScreen() {
   const durationDays = useMemo(() => diffDays(start, end), [start, end]);
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
 
-  const onSubmit = () => {
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    navigation.setOptions({ title: "" }); 
+  }, [navigation]);
+
+  const onSubmit = async () => {
     if (!canSubmit) {
       Alert.alert("Missing info", "Please add at least the place name and a start date.");
       return;
+    }
+
+    let lat: number | null = null;
+    let lng: number | null = null;
+
+    // Try exact input; if that fails, try adding a country hint
+    const primary = await geocodePlace(place);
+    const fallback =
+      !primary && /,/.test(place) === false
+        ? await geocodePlace(`${place}, Canada`) // small bias since you’re in Toronto
+        : null;
+
+    const hit = primary || fallback;
+    if (hit) {
+      lat = hit.lat;
+      lng = hit.lng;
+      console.log("Geocoded via Mapbox:", place, lat, lng, "→", hit.name);
+    } else {
+      console.log("No geocode results for", place);
     }
 
     const parts: string[] = [];
@@ -58,17 +84,16 @@ export default function AddStepScreen() {
       parts.push(`Duration: ${d} day${d === 1 ? "" : "s"} (${start.toDateString()} – ${end.toDateString()})`);
     }
 
-    // Store start date in visitedAt; keep end date as a custom field (endAt).
-    // Casting to any to avoid strict typing changes in TripContext.
     addStep(trip.id, {
       title: place.trim(),
       note: parts.join("\n"),
       visitedAt: toISO(start),
-      // extra field we’ll read in the details screen:
-      ...(end ? ({ endAt: toISO(end) } as any) : {}),
+      endAt: end ? toISO(end) : undefined,
+      lat,
+      lng,
     } as any);
 
-    router.back(); // return to details
+    router.back();
   };
 
   return (
@@ -78,7 +103,7 @@ export default function AddStepScreen() {
       {/* Place name */}
       <Text style={gs.label}>City / Attraction</Text>
       <TextInput
-        placeholder="e.g., Tokyo Skytree"
+        placeholder="Main destination"
         value={place}
         onChangeText={setPlace}
         style={gs.input}
@@ -103,7 +128,7 @@ export default function AddStepScreen() {
       {/* Where to stay */}
       <Text style={gs.label}>Where to stay</Text>
       <TextInput
-        placeholder="Hotel / Hostel / Neighborhood"
+        placeholder="Hotel / Hostel / Airbnb"
         value={whereStay}
         onChangeText={setWhereStay}
         style={gs.input}
@@ -113,7 +138,7 @@ export default function AddStepScreen() {
       {/* Things to see & do */}
       <Text style={gs.label}>Things to see & do</Text>
       <TextInput
-        placeholder="Bullet points or comma-separated list"
+        placeholder="..."
         value={things}
         onChangeText={setThings}
         style={[gs.input, { height: 100 }]}

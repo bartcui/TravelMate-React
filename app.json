@@ -26,6 +26,9 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "extra": {
+      "MAPBOX_TOKEN": "pk.eyJ1IjoiYmFydGN1aSIsImEiOiJjbWh0bzhtdngxdzBzMmpwejlpNTB2bHZ0In0.v6fAWhJImlMMhCe2rMGMpA"
+    },
     "plugins": [
       "expo-router"
     ]

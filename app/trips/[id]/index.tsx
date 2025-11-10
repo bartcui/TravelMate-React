@@ -1,4 +1,3 @@
-// app/trips/[id]/index.tsx
 import React, { useEffect, useMemo } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
@@ -7,10 +6,9 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
 import { useRouter } from "expo-router";
-
+import { Alert } from "react-native";
+const router = useRouter();
 export default function TripDetailsScreen() {
-  const router = useRouter();
-
   const scheme = useColorScheme();
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
@@ -36,20 +34,20 @@ export default function TripDetailsScreen() {
     const end = item.endAt ? new Date(item.endAt) : null;
 
     return (
+      <Pressable onPress={() => router.push(`/trips/${trip.id}/steps/${item.id}/edit`)}>
         <View style={styles(t).stepCard}>
-        <Text style={styles(t).stepTitle}>{item.title || "Untitled step"}</Text>
-        {(start || end) && (
+          <Text style={styles(t).stepTitle}>{item.title || "Untitled step"}</Text>
+          {(start || end) && (
             <Text style={styles(t).stepDate}>
-            {start ? start.toDateString() : "—"}
-            {end ? ` – ${end.toDateString()}` : ""}
+              {start ? start.toDateString() : "—"}
+              {end ? ` – ${end.toDateString()}` : ""}
             </Text>
-        )}
-        {!!item.note && <Text style={styles(t).stepNote}>{item.note}</Text>}
+          )}
+          {!!item.note && <Text style={styles(t).stepNote}>{item.note}</Text>}
         </View>
+      </Pressable>
     );
-    };
-
-
+  };
 
   const Header = () => (
     <View>
@@ -75,13 +73,43 @@ export default function TripDetailsScreen() {
       </Pressable>
     </View>
   );
-
+  const { removeTrip } = useTrips();
+  const router = useRouter();
   const Footer = () => (
-    <View style={[styles(t).markerRow, { marginTop: 12 }]}>
-      <Text style={styles(t).icon}>🏁</Text>
-      <Text style={styles(t).markerText}>
-        Trip finishes {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
-      </Text>
+    <View>
+      <View style={[styles(t).markerRow, { marginTop: 12 }]}>
+        <Text style={styles(t).icon}>🏁</Text>
+        <Text style={styles(t).markerText}>
+          Trip finishes {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
+        </Text>
+      </View>
+
+      {/* Edit / Delete buttons */}
+      <Pressable
+        style={gs.primaryButton}
+        onPress={() => router.push(`/trips/${trip.id}/edit`)}
+      >
+        <Text style={gs.primaryButtonText}>Save / Edit Trip</Text>
+      </Pressable>
+
+      <Pressable
+        style={[gs.primaryButton, { backgroundColor: "#eb5757", marginTop: 8 }]}
+        onPress={() => {
+          Alert.alert("Delete this trip?", "This cannot be undone.", [
+            { text: "Cancel", style: "cancel" },
+            {
+              text: "Delete",
+              style: "destructive",
+              onPress: () => {
+                removeTrip(trip.id);     // <-- from TripContext
+                router.replace("/");     // go back to Home
+              },
+            },
+          ]);
+        }}
+      >
+        <Text style={gs.primaryButtonText}>Delete Trip</Text>
+      </Pressable>
     </View>
   );
 
