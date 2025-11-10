@@ -7,6 +7,7 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../../../styles/colors";
 import { makeGlobalStyles } from "../../../styles/globalStyles";
 import { useNavigation } from "expo-router";
+import { geocodePlace } from "../../../utils/geocode";
 
 function toISO(d: Date | null) {
   return d ? d.toISOString() : undefined;
@@ -50,10 +51,29 @@ export default function AddStepScreen() {
     navigation.setOptions({ title: "" }); 
   }, [navigation]);
 
-  const onSubmit = () => {
+  const onSubmit = async () => {
     if (!canSubmit) {
       Alert.alert("Missing info", "Please add at least the place name and a start date.");
       return;
+    }
+
+    let lat: number | null = null;
+    let lng: number | null = null;
+
+    // Try exact input; if that fails, try adding a country hint
+    const primary = await geocodePlace(place);
+    const fallback =
+      !primary && /,/.test(place) === false
+        ? await geocodePlace(`${place}, Canada`) // small bias since you’re in Toronto
+        : null;
+
+    const hit = primary || fallback;
+    if (hit) {
+      lat = hit.lat;
+      lng = hit.lng;
+      console.log("Geocoded via Mapbox:", place, lat, lng, "→", hit.name);
+    } else {
+      console.log("No geocode results for", place);
     }
 
     const parts: string[] = [];
@@ -64,17 +84,16 @@ export default function AddStepScreen() {
       parts.push(`Duration: ${d} day${d === 1 ? "" : "s"} (${start.toDateString()} – ${end.toDateString()})`);
     }
 
-    // Store start date in visitedAt; keep end date as a custom field (endAt).
-    // Casting to any to avoid strict typing changes in TripContext.
     addStep(trip.id, {
       title: place.trim(),
       note: parts.join("\n"),
       visitedAt: toISO(start),
-      // extra field we’ll read in the details screen:
-      ...(end ? ({ endAt: toISO(end) } as any) : {}),
+      endAt: end ? toISO(end) : undefined,
+      lat,
+      lng,
     } as any);
 
-    router.back(); // return to details
+    router.back();
   };
 
   return (

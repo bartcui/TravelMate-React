@@ -12,7 +12,10 @@ export type TripStep = {
   photos?: string[];          
   latitude?: number;
   longitude?: number;
-  visitedAt?: string;       
+  visitedAt?: string;  
+  lat?: number | null;
+  lng?: number | null;
+  endAt?: string | null;     
 };
 
 export type Trip = {

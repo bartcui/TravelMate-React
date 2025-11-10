@@ -7,6 +7,8 @@ import { useTrips } from "../../../../../contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "../../../../../styles/colors";
 import { makeGlobalStyles } from "../../../../../styles/globalStyles";
+import { geocodePlace } from "../../../../../utils/geocode";
+
 
 function toShort(d?: Date | null) { return d ? d.toDateString() : "Select date"; }
 function toISO(d: Date | null) { return d ? d.toISOString() : undefined; }
@@ -33,6 +35,7 @@ export default function EditStepScreen() {
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
+  const [saving, setSaving] = useState(false);
 
   // Hydrate state whenever `step` changes (first load or edit another step)
   useEffect(() => {
@@ -46,31 +49,63 @@ export default function EditStepScreen() {
     setEnd(parseISO((step as any).endAt));
   }, [step]);
 
-  // Keep title updated
   useEffect(() => {
     navigation.setOptions({ title: place || "Edit Step" });
   }, [navigation, place]);
 
-  const onSave = () => {
-    if (!trip || !step) return; // nothing to save if they don't exist
+    const onSave = async () => {
+    if (!trip || !step) return;
+
     if (!place.trim() || !start) {
-      Alert.alert("Missing info", "Place and start date are required.");
-      return;
+        Alert.alert("Missing info", "Place and start date are required.");
+        return;
     }
-    const parts: string[] = [];
-    if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
-    if (things.trim()) parts.push(`To do: ${things.trim()}`);
-    if (start && end) parts.push(`Duration: (${start.toDateString()} – ${end.toDateString()})`);
 
-    updateStep(trip.id, step.id, {
-      title: place.trim(),
-      note: parts.join("\n"),
-      visitedAt: toISO(start),
-      ...(end ? ({ endAt: toISO(end) } as any) : ({ endAt: undefined } as any)),
-    });
+    setSaving(true);
+    try {
+        const parts: string[] = [];
+        if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
+        if (things.trim()) parts.push(`To do: ${things.trim()}`);
+        if (start && end) parts.push(`Duration: (${start.toDateString()} – ${end.toDateString()})`);
 
-    router.back();
-  };
+        let nextLat: number | null | undefined = (step as any).lat ?? null;
+        let nextLng: number | null | undefined = (step as any).lng ?? null;
+
+        // if the place name changed or coords are missing, redo
+        const placeChanged =
+        (step.title ?? "").trim().toLowerCase() !== place.trim().toLowerCase();
+        const coordsMissing = typeof nextLat !== "number" || typeof nextLng !== "number";
+
+        if (placeChanged || coordsMissing) {
+        const hit = await geocodePlace(place.trim());
+        const fallback = !hit && !/,/.test(place) ? await geocodePlace(`${place.trim()}, Canada`) : null; //add bias
+        const best = hit || fallback;
+
+        if (best) {
+            nextLat = best.lat;
+            nextLng = best.lng;
+            console.log("Re-geocoded via Mapbox:", place, nextLat, nextLng, "→", best.name);
+        } else {
+            console.log("Re-geocode failed; keeping previous coords.");
+        }
+        }
+
+        updateStep(trip.id, step.id, {
+        title: place.trim(),
+        note: parts.join("\n"),
+        visitedAt: toISO(start),
+        ...(end ? ({ endAt: toISO(end) } as any) : ({ endAt: undefined } as any)),
+        ...(typeof nextLat === "number" && typeof nextLng === "number"
+            ? ({ lat: nextLat, lng: nextLng } as any)
+            : {}),
+        });
+
+        router.back();
+    } finally {
+        setSaving(false);
+    }
+    };
+
 
   const onDelete = () => {
     if (!trip || !step) return;

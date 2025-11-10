@@ -7,6 +7,7 @@ import { getTheme } from "../styles/colors";
 import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
 import { useUser, AVATARS } from "../contexts/UserContext";
+import MapPreview from "../components/MapPreview";
 
 export default function HomeScreen() {
   const scheme = useColorScheme();
@@ -64,6 +65,9 @@ export default function HomeScreen() {
           </Pressable>
         </Link>
       </View>
+
+      <View style={{ marginBottom: 8 }} />
+      <MapPreview />
 
       {/* Add Trip */}
       <Pressable style={gs.primaryButton} onPress={() => setPickerOpen(true)}>
