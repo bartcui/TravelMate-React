@@ -41,3 +41,10 @@ yarn-error.*
 /ios
 /android
 node_modules
+
+# Env files
+.env
+.env.*
+# Firebase credentials
+google-services.json
+GoogleService-Info.plist
