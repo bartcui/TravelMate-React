@@ -1,4 +1,4 @@
-import { Stack, Redirect, usePathname } from "expo-router";
+import { Stack, Redirect, useSegments } from "expo-router";
 import { TripProvider } from "../contexts/TripContext";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
@@ -8,7 +8,8 @@ import { ActivityIndicator, View } from "react-native";
 export default function RootLayout() {
   const [user, setUser] = useState<User | null>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const pathname = usePathname();
+  const segments = useSegments(); // e.g. ["(auth)", "login"]
+  const inAuthGroup = segments[0] === "(auth)";
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => {
@@ -25,8 +26,8 @@ export default function RootLayout() {
       </View>
     );
 
-  if (!user && !pathname.startsWith("/auth")) {
-    return <Redirect href="/auth/login" />;
+  if (!user && !inAuthGroup) {
+    return <Redirect href="/login" />;
   }
 
   return (
@@ -35,6 +36,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ title: "Home" }} />
         <Stack.Screen name="trips/create" options={{ title: "Create Trip" }} />
         <Stack.Screen name="settings/index" options={{ title: "Settings" }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
     </TripProvider>
   );

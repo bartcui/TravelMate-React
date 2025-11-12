@@ -2,15 +2,17 @@ import { View, Text, StyleSheet, Switch, Button } from "react-native";
 import { useState } from "react";
 import { signOut } from "firebase/auth";
 import { auth } from "@/firebaseConfig";
-import { useRouter } from "expo-router";
+import { Redirect } from "expo-router";
 
 export default function SettingsScreen() {
-  const router = useRouter();
   const [notifications, setNotifications] = useState(true);
+  const [signedOut, setSignedOut] = useState(false);
   const handleLogout = async () => {
     await signOut(auth);
-    router.replace("/auth/login/");
+    setSignedOut(true);
   };
+
+  if (signedOut) return <Redirect href="/" />;
 
   return (
     <View style={styles.container}>

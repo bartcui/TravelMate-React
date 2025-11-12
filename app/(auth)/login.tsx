@@ -1,49 +1,36 @@
-// app/auth/register/index.tsx
-import React, { useEffect, useState } from "react";
+// app/auth/login.tsx
+import React, { useState, useEffect } from "react";
+import { View, Text, TextInput, Button, StyleSheet, Alert } from "react-native";
 import {
-  View,
-  Text,
-  TextInput,
-  Button,
-  StyleSheet,
-  Alert,
-  TouchableOpacity,
-  Platform,
-} from "react-native";
-import { router } from "expo-router";
-import { useColorScheme } from "react-native";
-
-import { auth, db } from "@/firebaseConfig";
-import {
-  createUserWithEmailAndPassword,
-  updateProfile,
+  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithCredential,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
-
+import { auth } from "@/firebaseConfig";
+import { useRouter } from "expo-router";
+import { useColorScheme, Platform } from "react-native";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 import {
   GoogleSignin,
   GoogleSigninButton,
   statusCodes,
   isErrorWithCode,
 } from "@react-native-google-signin/google-signin";
+import { upsertUserProfile } from "@/utils/userUtils";
 
-import { getTheme } from "@/styles/colors";
-import { makeGlobalStyles } from "@/styles/globalStyles";
-
-// ---- IDs ----
-const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "";
-
-export default function RegisterScreen() {
-  const [displayName, setDisplayName] = useState("");
+export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
   const scheme = useColorScheme();
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
+
+  const WEB_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID || "";
 
   // Configure Google Signin once
   useEffect(() => {
@@ -114,67 +101,50 @@ export default function RegisterScreen() {
     }
   };
 
-  // ---------- Email/Password Sign Up ----------
-  const handleRegister = async () => {
+  const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Missing info", "Email and password are required.");
+      Alert.alert("Error", "Please fill out all fields.");
       return;
     }
+    setLoading(true);
     try {
-      setBusy(true);
-      const cred = await createUserWithEmailAndPassword(
-        auth,
-        email.trim(),
-        password
-      );
-      if (displayName) {
-        await updateProfile(cred.user, { displayName });
-      }
-      await upsertUserProfile(cred.user.uid, {
-        displayName: displayName || cred.user.displayName || "",
-        email: cred.user.email ?? "",
-        photoURL: cred.user.photoURL ?? "",
-        provider: "password",
-      });
-      router.replace("/");
-    } catch (e: any) {
-      Alert.alert("Registration failed", e?.message ?? String(e));
+      await signInWithEmailAndPassword(auth, email, password);
+      router.replace("/"); // redirect to home (index.tsx)
+    } catch (error: any) {
+      Alert.alert("Login failed", error.message);
     } finally {
-      setBusy(false);
+      setLoading(false);
     }
   };
 
   return (
     <View style={gs.container}>
-      <Text style={gs.title}>Create your TravelMate account</Text>
+      <Text style={gs.title}>Welcome back!</Text>
 
       <TextInput
-        placeholder="Display name"
-        value={displayName}
-        onChangeText={setDisplayName}
         style={gs.input}
-      />
-      <TextInput
         placeholder="Email"
-        keyboardType="email-address"
         autoCapitalize="none"
         value={email}
         onChangeText={setEmail}
-        style={gs.input}
       />
+
       <TextInput
+        style={gs.input}
         placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
-        style={gs.input}
       />
 
       <Button
-        title={busy ? "Creating..." : "Create account"}
-        onPress={handleRegister}
-        disabled={busy}
+        title={loading ? "Logging in..." : "Login"}
+        onPress={handleLogin}
       />
+
+      <Text style={styles.register} onPress={() => router.push("/register")}>
+        Don’t have an account? Register
+      </Text>
 
       <View style={styles.sepRow}>
         <View style={styles.sep} />
@@ -188,36 +158,18 @@ export default function RegisterScreen() {
         color={GoogleSigninButton.Color.Light}
         onPress={signInWithGoogleNative}
       />
-
-      <TouchableOpacity onPress={() => router.replace("/auth/login")}>
-        <Text style={styles.link}>Already have an account? Sign in</Text>
-      </TouchableOpacity>
     </View>
   );
 }
 
-// ---------- Helpers ----------
-async function upsertUserProfile(
-  uid: string,
-  data: {
-    displayName: string;
-    email: string;
-    photoURL: string;
-    provider: string;
-  }
-) {
-  await setDoc(
-    doc(db, "users", uid),
-    { ...data, updatedAt: serverTimestamp(), createdAt: serverTimestamp() },
-    { merge: true }
-  );
-}
-
-// ---------- Styles ----------
 const styles = StyleSheet.create({
+  register: {
+    textAlign: "center",
+    color: "#007bff",
+    marginTop: 16,
+  },
   sepRow: { flexDirection: "row", alignItems: "center", marginVertical: 14 },
   googleBtn: { width: "100%", height: 48 },
   sep: { flex: 1, height: 1, backgroundColor: "#eee" },
   sepText: { marginHorizontal: 8, color: "#888" },
-  link: { textAlign: "center", color: "#007bff" },
 });
