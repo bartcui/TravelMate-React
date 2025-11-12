@@ -7,13 +7,19 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "scheme": "travelmate",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ece1778.travelmate",
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +27,9 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.ece1778.travelmate",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,7 +38,15 @@
       "MAPBOX_TOKEN": "pk.eyJ1IjoiYmFydGN1aSIsImEiOiJjbWh0bzhtdngxdzBzMmpwejlpNTB2bHZ0In0.v6fAWhJImlMMhCe2rMGMpA"
     },
     "plugins": [
-      "expo-router"
-    ]
+      "expo-router",
+      "@react-native-google-signin/google-signin"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c410be8c-4ab7-4ac0-8163-8420a6259499"
+      }
+    },
+    "owner": "liloliver"
   }
 }

@@ -1,6 +1,14 @@
 // Home Screen
 import React, { useState, useMemo } from "react";
-import { View, Text, FlatList, Pressable, Modal, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  Modal,
+  StyleSheet,
+  Image,
+} from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
 import { getTheme } from "../styles/colors";
@@ -40,9 +48,12 @@ export default function HomeScreen() {
         <Text style={[styles(t).cardTitle]}>{item.name}</Text>
         <Text style={[styles(t).cardSubtitle]}>
           {item.startDate ? new Date(item.startDate).toDateString() : "—"} →{" "}
-          {item.endDate ? new Date(item.endDate).toDateString() : "—"} • {status.toUpperCase()}
+          {item.endDate ? new Date(item.endDate).toDateString() : "—"} •{" "}
+          {status.toUpperCase()}
         </Text>
-        {!!item.summary && <Text style={[styles(t).cardSummary]}>{item.summary}</Text>}
+        {!!item.summary && (
+          <Text style={[styles(t).cardSummary]}>{item.summary}</Text>
+        )}
       </Pressable>
     );
   };
@@ -124,7 +135,9 @@ export default function HomeScreen() {
               style={[styles(t).modalBtn, styles(t).modalCancel]}
               onPress={() => setPickerOpen(false)}
             >
-              <Text style={[styles(t).modalBtnTxt, { opacity: 0.7 }]}>Cancel</Text>
+              <Text style={[styles(t).modalBtnTxt, { opacity: 0.7 }]}>
+                Cancel
+              </Text>
             </Pressable>
           </View>
         </View>
@@ -174,7 +187,12 @@ const styles = (t: ReturnType<typeof getTheme>) =>
       borderWidth: 1,
       borderColor: t.border,
     },
-    modalTitle: { fontSize: 16, fontWeight: "700", marginBottom: 8, color: t.text },
+    modalTitle: {
+      fontSize: 16,
+      fontWeight: "700",
+      marginBottom: 8,
+      color: t.text,
+    },
     modalBtn: { paddingVertical: 12, alignItems: "center" },
     modalBtnTxt: { fontWeight: "600", color: t.text },
     modalCancel: { borderTopWidth: 1, borderTopColor: t.border, marginTop: 8 },

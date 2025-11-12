@@ -1,7 +1,10 @@
 import { Stack, useRouter, useSegments } from "expo-router";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { TripProvider } from "../contexts/TripContext";
 import { UserProvider, useUser } from "../contexts/UserContext";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/firebaseConfig";
+import { ActivityIndicator, View } from "react-native";
 
 function Gate({ children }: { children: React.ReactNode }) {
   const { profile, isLoaded } = useUser();
@@ -24,6 +27,30 @@ function Gate({ children }: { children: React.ReactNode }) {
 }
 
 export default function RootLayout() {
+  const [user, setUser] = useState<User | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const segments = useSegments(); // e.g. ["(auth)", "login"]
+  const inAuthGroup = segments[0] === "(auth)";
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setCheckingAuth(false);
+    });
+    return unsub;
+  }, []);
+
+  if (checkingAuth)
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
+
+  if (!user && !inAuthGroup) {
+    return <Redirect href="/login" />;
+  }
+
   return (
     <UserProvider>
       <TripProvider>
@@ -37,6 +64,7 @@ export default function RootLayout() {
             <Stack.Screen name="trips/[id]/add-step" options={{ title: "Add Step" }} />
             <Stack.Screen name="trips/[id]/steps/[stepId]/edit" options={{ title: "Edit Step" }} />
             <Stack.Screen name="settings/index" options={{ title: "Settings" }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           </Stack>
         </Gate>
       </TripProvider>

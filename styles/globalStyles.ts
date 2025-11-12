@@ -6,12 +6,31 @@ export const makeGlobalStyles = (t: Theme) =>
   StyleSheet.create({
     // layout
     screen: { flex: 1, backgroundColor: t.bg, padding: 16 },
-    rowBetween: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+    rowBetween: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+    },
 
     // text
     h1: { fontSize: 22, fontWeight: "800", color: t.text, marginBottom: 12 },
     label: { fontSize: 13, color: t.text, marginTop: 8 },
 
+    // container
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      padding: 20,
+      backgroundColor: "#fff",
+    },
+
+    // title
+    title: {
+      fontSize: 24,
+      fontWeight: "600",
+      marginBottom: 24,
+      textAlign: "center",
+    },
     // inputs
     input: {
       borderWidth: 1,
