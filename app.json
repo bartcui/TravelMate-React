@@ -19,6 +19,9 @@
       "googleServicesFile": "./GoogleService-Info.plist",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
+      },
+      "config": {
+        "googleMapsApiKey": "process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
       }
     },
     "android": {
@@ -35,18 +38,33 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "MAPBOX_TOKEN": "pk.eyJ1IjoiYmFydGN1aSIsImEiOiJjbWh0bzhtdngxdzBzMmpwejlpNTB2bHZ0In0.v6fAWhJImlMMhCe2rMGMpA"
-    },
-    "plugins": [
-      "expo-router",
-      "@react-native-google-signin/google-signin"
-    ],
-    "extra": {
+      "MAPBOX_TOKEN": "pk.eyJ1IjoiYmFydGN1aSIsImEiOiJjbWh0bzhtdngxdzBzMmpwejlpNTB2bHZ0In0.v6fAWhJImlMMhCe2rMGMpA",
       "router": {},
       "eas": {
         "projectId": "c410be8c-4ab7-4ac0-8163-8420a6259499"
       }
     },
+    "plugins": [
+      "expo-router",
+      "@react-native-firebase/app",
+      "@react-native-google-signin/google-signin",
+      [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey": "process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY"
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": 
+          {
+            "useFrameworks": "static",
+          "deploymentTarget": "18.6"
+          }
+        }
+      ]
+    ],
     "owner": "liloliver"
   }
 }

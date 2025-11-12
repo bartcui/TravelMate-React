@@ -25,9 +25,12 @@ export default function HomeScreen() {
   const router = useRouter();
   const { trips } = useTrips();
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { profile } = useUser();
-  const displayName = profile?.name || "Traveler";
-  const avatarUri = profile ? AVATARS[profile.avatarId] : "https://i.pravatar.cc/100?img=12";
+  const { user, avatarId } = useUser();
+  const displayName = user?.displayName || "Traveler";
+  const avatarUri: string =
+  (avatarId && AVATARS[avatarId]) ??
+  user?.photoURL ??
+  "https://i.pravatar.cc/100?img=12";
 
   const sortedTrips = useMemo(() => {
     // sort most recent startDate first; fallback to name
@@ -70,7 +73,7 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <Link href="/settings" asChild>
+        <Link href="/profile" asChild>
           <Pressable style={styles(t).settingsBtn}>
             <Text style={styles(t).settingsTxt}>⚙️</Text>
           </Pressable>
@@ -91,7 +94,11 @@ export default function HomeScreen() {
         keyExtractor={(tr) => tr.id}
         renderItem={renderTrip}
         contentContainerStyle={{ paddingBottom: 40 }}
-        ListEmptyComponent={<Text style={styles(t).empty}>Your travel story starts here. Tap “Add Trip”.</Text>}
+        ListEmptyComponent={
+          <Text style={styles(t).empty}>
+            Your travel story starts here. Tap “Add Trip”.
+          </Text>
+        }
       />
 
       {/* Add Trip Type Picker (Past / Current / Future) */}

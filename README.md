@@ -250,3 +250,12 @@ Both team members will collaborate on:
    - Prepare presentation and documentation.
 
 ---
+
+#### **Setup the testing env**
+
+```bash
+npm install
+npx expo prebuild
+eas build --profile development --platform ios
+npx expo start --dev-client
+```
