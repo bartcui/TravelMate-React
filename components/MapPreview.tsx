@@ -4,7 +4,6 @@ import { StyleSheet, View } from "react-native";
 import { useTrips } from "@/contexts/TripContext";
 import { geocodePlace } from "@/utils/geocode";
 import { useUser } from "@/contexts/UserContext";
-import { NIGHT_MAP_STYLE } from "@/utils/mapUtils";
 
 const NORTH_AMERICA = {
   latitude: 39,
@@ -92,7 +91,7 @@ export default function MapPreview() {
     ? {
         latitude: homeCoord.latitude,
         longitude: homeCoord.longitude,
-        latitudeDelta: 12,
+        latitudeDelta: 11,
         longitudeDelta: 10,
       }
     : NORTH_AMERICA;
@@ -106,7 +105,6 @@ export default function MapPreview() {
         initialRegion={initialRegion}
         showsUserLocation
         showsMyLocationButton
-        customMapStyle={NIGHT_MAP_STYLE}
         pitchEnabled={false}
         rotateEnabled={false}
         toolbarEnabled={false}
