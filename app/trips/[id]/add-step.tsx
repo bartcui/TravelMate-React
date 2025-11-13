@@ -106,7 +106,7 @@ export default function AddStepScreen() {
         title: place.trim(),
         note: parts.join("\n"),
         visitedAt: toISO(start),
-        endAt: end ? toISO(end) : undefined,
+        endAt: end ? toISO(end) : null,
         lat,
         lng,
       } as any);
@@ -125,7 +125,7 @@ export default function AddStepScreen() {
       <Text style={gs.h1}>Add Step</Text>
 
       {/* Place name */}
-      <Text style={gs.label}>City / Attraction</Text>
+      <Text style={gs.label}>City / Attraction<Text style={gs.asterisk}> *</Text></Text>
       <TextInput
         placeholder="Main destination"
         value={place}
@@ -135,7 +135,7 @@ export default function AddStepScreen() {
       />
 
       {/* Dates */}
-      <Text style={gs.label}>Start date</Text>
+      <Text style={gs.label}>Start date<Text style={gs.asterisk}> *</Text></Text>
       <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
         <Text style={gs.dateTxt}>{toShort(start)}</Text>
       </Pressable>

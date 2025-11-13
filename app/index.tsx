@@ -9,6 +9,7 @@ import {
   Modal,
   StyleSheet,
   Image,
+  Animated,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
@@ -17,6 +18,7 @@ import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
 import { useUser } from "../contexts/UserContext";
 import MapPreview from "../components/MapPreview";
+import { sheetTop, panResponder } from "@/utils/homeUtils";
 
 export default function HomeScreen() {
   const scheme = useColorScheme();
@@ -59,50 +61,65 @@ export default function HomeScreen() {
   };
 
   return (
-    <View style={gs.screen}>
-      {/* Header: avatar + name + settings */}
-      <View style={styles(t).headerRow}>
-        <View style={styles(t).profileRow}>
-          <Image source={{ uri: baseAvatarUri }} style={styles(t).avatar} />
-          <View>
-            <Text style={styles(t).hello}>Hello,</Text>
-            <Text style={styles(t).name}>{displayName}</Text>
-          </View>
-        </View>
-
-        <Link href="/profile" asChild>
-          <Pressable style={styles(t).settingsBtn}>
-            <Text style={styles(t).settingsTxt}>
-              <Ionicons
-                name="person-circle-outline"
-                size={32}
-                color="#4b5563"
-              />
-            </Text>
-          </Pressable>
-        </Link>
+    <View style={gs.homeScreen}>
+      {/* Map fills the background area; sheet will float on top */}
+      <View style={gs.mapContainer}>
+        <MapPreview />
       </View>
 
-      <View style={{ marginBottom: 8 }} />
-      <MapPreview />
+      {/* Draggable bottom sheet (card with trips) */}
+      <Animated.View
+        style={[
+          gs.bottomSheet,
+          {
+            top: sheetTop,
+          },
+        ]}
+        {...panResponder.panHandlers}
+      >
+        {/* Handle bar */}
+        <View style={gs.sheetHandle} />
 
-      {/* Add Trip */}
-      <Pressable style={gs.primaryButton} onPress={() => setPickerOpen(true)}>
-        <Text style={gs.primaryButtonText}>＋ Add Trip</Text>
-      </Pressable>
+        {/* Header: avatar + name + settings */}
+        <View style={styles(t).headerRow}>
+          <View style={styles(t).profileRow}>
+            <Image source={{ uri: baseAvatarUri }} style={styles(t).avatar} />
+            <View>
+              <Text style={styles(t).hello}>Hello,</Text>
+              <Text style={styles(t).name}>{displayName}</Text>
+            </View>
+          </View>
 
-      {/* Trips list */}
-      <FlatList
-        data={sortedTrips}
-        keyExtractor={(tr) => tr.id}
-        renderItem={renderTrip}
-        contentContainerStyle={{ paddingBottom: 40 }}
-        ListEmptyComponent={
-          <Text style={styles(t).empty}>
-            Your travel story starts here. Tap “Add Trip”.
-          </Text>
-        }
-      />
+          <Link href="/profile" asChild>
+            <Pressable style={styles(t).settingsBtn}>
+              <Text style={styles(t).settingsTxt}>
+                <Ionicons
+                  name="person-circle-outline"
+                  size={32}
+                  color="#4b5563"
+                />
+              </Text>
+            </Pressable>
+          </Link>
+        </View>
+        {/* Add Trip */}
+        <Pressable style={gs.primaryButton} onPress={() => setPickerOpen(true)}>
+          <Text style={gs.primaryButtonText}>＋ Add Trip</Text>
+        </Pressable>
+
+        {/* Trips list */}
+        <FlatList
+          data={sortedTrips}
+          keyExtractor={(tr) => tr.id}
+          renderItem={renderTrip}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          ListEmptyComponent={
+            <Text style={styles(t).empty}>
+              Your travel story starts here. Tap “Add Trip”.
+            </Text>
+          }
+        />
+      </Animated.View>
 
       {/* Add Trip Type Picker (Past / Current / Future) */}
       <Modal

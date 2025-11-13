@@ -38,7 +38,7 @@ export type TripStep = {
 export type Trip = {
   id: string;
   name: string;
-  summary?: string;
+  summary?: string | null;
   startDate?: string;
   endDate?: string | null;
   privacy: TripPrivacy;

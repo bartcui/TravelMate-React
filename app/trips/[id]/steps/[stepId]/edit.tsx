@@ -173,7 +173,7 @@ export default function EditStepScreen() {
     <View style={gs.screen}>
       <Text style={gs.h1}>Edit Step</Text>
 
-      <Text style={gs.label}>City / Attraction</Text>
+      <Text style={gs.label}>City / Attraction<Text style={gs.asterisk}> *</Text></Text>
       <TextInput
         placeholder="e.g., Tokyo Skytree"
         value={place}
@@ -182,7 +182,7 @@ export default function EditStepScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>Start date</Text>
+      <Text style={gs.label}>Start date<Text style={gs.asterisk}> *</Text></Text>
       <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
         <Text style={gs.dateTxt}>{toShort(start)}</Text>
       </Pressable>

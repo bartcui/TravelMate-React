@@ -1,11 +1,13 @@
 // styles/globalStyles.ts
 import { StyleSheet } from "react-native";
 import type { Theme } from "./colors";
+import {SCREEN_HEIGHT} from "@/utils/homeUtils";
 
 export const makeGlobalStyles = (t: Theme) =>
   StyleSheet.create({
     // layout
     screen: { flex: 1, backgroundColor: t.bg, padding: 16 },
+    homeScreen: { flex: 1, backgroundColor: t.bg },
     rowBetween: {
       flexDirection: "row",
       alignItems: "center",
@@ -125,5 +127,44 @@ export const makeGlobalStyles = (t: Theme) =>
     asterisk: {
       fontSize: 16,
       color: "red",
+    },
+    mapContainer: {
+      flex: 1,
+      overflow: "hidden",
+      borderRadius: 16,
+      marginBottom: 8,
+    },
+    empty: {
+      textAlign: "center",
+      marginTop: 40,
+      color: t.textMuted,
+    },
+
+    // Bottom sheet styles
+    bottomSheet: {
+      position: "absolute",
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: t.bg,
+      borderTopLeftRadius: 20,
+      borderTopRightRadius: 20,
+      shadowColor: "#000",
+      shadowOpacity: 0.15,
+      shadowRadius: 8,
+      shadowOffset: { width: 0, height: -2 },
+      elevation: 5,
+      paddingTop: 16,
+      paddingLeft:16,
+      paddingRight:16,
+      maxHeight: SCREEN_HEIGHT,
+    },
+    sheetHandle: {
+      alignSelf: "center",
+      width: 40,
+      height: 6,
+      borderRadius: 2,
+      backgroundColor: t.border,
+      marginBottom: 8,
     },
   });

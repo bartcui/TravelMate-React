@@ -61,7 +61,7 @@ export default function CreateTripScreen() {
 
       const newId = await addTrip({
         name: name.trim(),
-        summary: summary.trim() || undefined,
+        summary: summary.trim() || null,
         startDate: toISODate(startDate),
         endDate: unknownEnd ? null : toISODate(endDate),
         privacy,
