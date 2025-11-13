@@ -26,19 +26,29 @@ function Gate({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+// Inner layout that is allowed to use useUser()
+function RootLayoutInner() {
+  const { user } = useUser();
+
+  return (
+    <Gate>
+      <TripProvider userId={user?.uid ?? null}>
+        <Stack screenOptions={{ headerShadowVisible: false }}>
+          <Stack.Screen name="index" options={{ title: "Home" }} />
+          <Stack.Screen name="onboarding" options={{ title: "Welcome" }} />
+          <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        </Stack>
+      </TripProvider>
+    </Gate>
+  );
+}
+
+// Top-level component that only wraps with providers
 export default function RootLayout() {
   return (
     <UserProvider>
-      <Gate>
-        <TripProvider>
-          <Stack screenOptions={{ headerShadowVisible: false }}>
-            <Stack.Screen name="index" options={{ title: "Home" }} />
-            <Stack.Screen name="onboarding" options={{ title: "Welcome" }} />
-            <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          </Stack>
-        </TripProvider>
-      </Gate>
+      <RootLayoutInner />
     </UserProvider>
   );
 }

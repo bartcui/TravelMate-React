@@ -1,18 +1,30 @@
 // app/trips/[id]/steps/[stepId]/edit.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, Alert, Platform } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  Platform,
+} from "react-native";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { useTrips } from "../../../../../contexts/TripContext";
+import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
-import { getTheme } from "../../../../../styles/colors";
-import { makeGlobalStyles } from "../../../../../styles/globalStyles";
-import { geocodePlace } from "../../../../../utils/geocode";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
+import { geocodePlace } from "@/utils/geocode";
 
-
-function toShort(d?: Date | null) { return d ? d.toDateString() : "Select date"; }
-function toISO(d: Date | null) { return d ? d.toISOString() : undefined; }
-function parseISO(iso?: string | null) { return iso ? new Date(iso) : null; }
+function toShort(d?: Date | null) {
+  return d ? d.toDateString() : "Select date";
+}
+function toISO(d: Date | null) {
+  return d ? d.toISOString() : undefined;
+}
+function parseISO(iso?: string | null) {
+  return iso ? new Date(iso) : null;
+}
 
 export default function EditStepScreen() {
   const { id, stepId } = useLocalSearchParams<{ id: string; stepId: string }>();
@@ -26,7 +38,10 @@ export default function EditStepScreen() {
 
   // Look up trip & step (pure values; no early returns!)
   const trip = getTripById(id!);
-  const step = useMemo(() => trip?.steps.find(s => s.id === stepId), [trip, stepId]);
+  const step = useMemo(
+    () => trip?.steps.find((s) => s.id === stepId),
+    [trip, stepId]
+  );
 
   // Local state: initialize with safe defaults; then hydrate from `step` in an effect
   const [place, setPlace] = useState("");
@@ -41,71 +56,87 @@ export default function EditStepScreen() {
   useEffect(() => {
     if (!step) return;
     setPlace(step.title ?? "");
-    const stayLine = step.note?.split("\n").find(l => l.toLowerCase().startsWith("stay:")) ?? "";
-    const todoLine = step.note?.split("\n").find(l => l.toLowerCase().startsWith("to do:")) ?? "";
+    const stayLine =
+      step.note?.split("\n").find((l) => l.toLowerCase().startsWith("stay:")) ??
+      "";
+    const todoLine =
+      step.note
+        ?.split("\n")
+        .find((l) => l.toLowerCase().startsWith("to do:")) ?? "";
     setWhereStay(stayLine.replace(/^stay:\s*/i, ""));
     setThings(todoLine.replace(/^to do:\s*/i, ""));
     setStart(parseISO(step.visitedAt as any));
     setEnd(parseISO((step as any).endAt));
   }, [step]);
 
-  useEffect(() => {
-    navigation.setOptions({ title: place || "Edit Step" });
-  }, [navigation, place]);
-
-    const onSave = async () => {
-    if (!trip || !step) return;
+  const onSave = async () => {
+    if (!trip || !step || saving) return;
 
     if (!place.trim() || !start) {
-        Alert.alert("Missing info", "Place and start date are required.");
-        return;
+      Alert.alert("Missing info", "Place and start date are required.");
+      return;
     }
 
     setSaving(true);
     try {
-        const parts: string[] = [];
-        if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
-        if (things.trim()) parts.push(`To do: ${things.trim()}`);
-        if (start && end) parts.push(`Duration: (${start.toDateString()} – ${end.toDateString()})`);
+      const parts: string[] = [];
+      if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
+      if (things.trim()) parts.push(`To do: ${things.trim()}`);
+      if (start && end)
+        parts.push(
+          `Duration: (${start.toDateString()} – ${end.toDateString()})`
+        );
 
-        let nextLat: number | null | undefined = (step as any).lat ?? null;
-        let nextLng: number | null | undefined = (step as any).lng ?? null;
+      let nextLat: number | null | undefined = (step as any).lat ?? null;
+      let nextLng: number | null | undefined = (step as any).lng ?? null;
 
-        // if the place name changed or coords are missing, redo
-        const placeChanged =
+      // if the place name changed or coords are missing, redo
+      const placeChanged =
         (step.title ?? "").trim().toLowerCase() !== place.trim().toLowerCase();
-        const coordsMissing = typeof nextLat !== "number" || typeof nextLng !== "number";
+      const coordsMissing =
+        typeof nextLat !== "number" || typeof nextLng !== "number";
 
-        if (placeChanged || coordsMissing) {
+      if (placeChanged || coordsMissing) {
         const hit = await geocodePlace(place.trim());
-        const fallback = !hit && !/,/.test(place) ? await geocodePlace(`${place.trim()}, Canada`) : null; //add bias
+        const fallback =
+          !hit && !/,/.test(place)
+            ? await geocodePlace(`${place.trim()}, Canada`)
+            : null; //add bias
         const best = hit || fallback;
 
         if (best) {
-            nextLat = best.lat;
-            nextLng = best.lng;
-            console.log("Re-geocoded via Mapbox:", place, nextLat, nextLng, "→", best.name);
+          nextLat = best.lat;
+          nextLng = best.lng;
+          console.log(
+            "Re-geocoded via Mapbox:",
+            place,
+            nextLat,
+            nextLng,
+            "→",
+            best.name
+          );
         } else {
-            console.log("Re-geocode failed; keeping previous coords.");
+          console.log("Re-geocode failed; keeping previous coords.");
         }
-        }
+      }
 
-        updateStep(trip.id, step.id, {
+      await updateStep(trip.id, step.id, {
         title: place.trim(),
         note: parts.join("\n"),
         visitedAt: toISO(start),
-        ...(end ? ({ endAt: toISO(end) } as any) : ({ endAt: undefined } as any)),
+        ...(end
+          ? ({ endAt: toISO(end) } as any)
+          : ({ endAt: undefined } as any)),
         ...(typeof nextLat === "number" && typeof nextLng === "number"
-            ? ({ lat: nextLat, lng: nextLng } as any)
-            : {}),
-        });
+          ? ({ lat: nextLat, lng: nextLng } as any)
+          : {}),
+      });
 
-        router.back();
+      router.back();
     } finally {
-        setSaving(false);
+      setSaving(false);
     }
-    };
-
+  };
 
   const onDelete = () => {
     if (!trip || !step) return;
@@ -180,8 +211,10 @@ export default function EditStepScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Pressable style={gs.primaryButton} onPress={onSave}>
-        <Text style={gs.primaryButtonText}>Save</Text>
+      <Pressable style={gs.primaryButton} onPress={onSave} disabled={saving}>
+        <Text style={gs.primaryButtonText}>
+          {saving ? "Saving..." : "Save"}
+        </Text>
       </Pressable>
       <Pressable
         style={[gs.primaryButton, { backgroundColor: "#eb5757", marginTop: 8 }]}
@@ -193,14 +226,21 @@ export default function EditStepScreen() {
       <DateTimePickerModal
         isVisible={showPicker === "start"}
         mode="date"
-        onConfirm={(d) => { setStart(d); if (end && d && end < d) setEnd(null); setShowPicker(null); }}
+        onConfirm={(d) => {
+          setStart(d);
+          if (end && d && end < d) setEnd(null);
+          setShowPicker(null);
+        }}
         onCancel={() => setShowPicker(null)}
         display={Platform.OS === "ios" ? "inline" : "default"}
       />
       <DateTimePickerModal
         isVisible={showPicker === "end"}
         mode="date"
-        onConfirm={(d) => { setEnd(d); setShowPicker(null); }}
+        onConfirm={(d) => {
+          setEnd(d);
+          setShowPicker(null);
+        }}
         onCancel={() => setShowPicker(null)}
         display={Platform.OS === "ios" ? "inline" : "default"}
       />

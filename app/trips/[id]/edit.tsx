@@ -1,15 +1,27 @@
 // app/trips/[id]/edit.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, Switch, Platform, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Switch,
+  Platform,
+  Alert,
+} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useTrips, TripPrivacy } from "../../../contexts/TripContext";
+import { useTrips, TripPrivacy } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
-import { getTheme } from "../../../styles/colors";
-import { makeGlobalStyles } from "../../../styles/globalStyles";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 
-function toISODate(d: Date | undefined | null) { return d ? d.toISOString() : undefined; }
-function parseISO(s?: string | null) { return s ? new Date(s) : null; }
+function toISODate(d: Date | undefined | null) {
+  return d ? d.toISOString() : undefined;
+}
+function parseISO(s?: string | null) {
+  return s ? new Date(s) : null;
+}
 
 export default function EditTripScreen() {
   const navigation = useNavigation();
@@ -26,15 +38,28 @@ export default function EditTripScreen() {
   // Form state (prefill from trip)
   const [name, setName] = useState(trip?.name ?? "");
   const [summary, setSummary] = useState(trip?.summary ?? "");
-  const [privacy, setPrivacy] = useState<TripPrivacy>((trip?.privacy as TripPrivacy) ?? "private");
-  const [trackerEnabled, setTrackerEnabled] = useState<boolean>(!!trip?.trackerEnabled);
-  const [startDate, setStartDate] = useState<Date | null>(parseISO(trip?.startDate));
-  const [endDate, setEndDate] = useState<Date | null>(parseISO(trip?.endDate ?? undefined));
-  const [unknownEnd, setUnknownEnd] = useState<boolean>(trip?.endDate ? false : true);
+  const [privacy, setPrivacy] = useState<TripPrivacy>(
+    (trip?.privacy as TripPrivacy) ?? "private"
+  );
+  const [trackerEnabled, setTrackerEnabled] = useState<boolean>(
+    !!trip?.trackerEnabled
+  );
+  const [startDate, setStartDate] = useState<Date | null>(
+    parseISO(trip?.startDate)
+  );
+  const [endDate, setEndDate] = useState<Date | null>(
+    parseISO(trip?.endDate ?? undefined)
+  );
+  const [unknownEnd, setUnknownEnd] = useState<boolean>(
+    trip?.endDate ? false : true
+  );
   const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    navigation.setOptions({ title: trip?.name ? `Edit: ${trip.name}` : "Edit Trip" });
+    navigation.setOptions({
+      title: trip?.name ? `Edit: ${trip.name}` : "Edit Trip",
+    });
   }, [navigation, trip?.name]);
 
   if (!trip) {
@@ -52,27 +77,37 @@ export default function EditTripScreen() {
     return true;
   }, [name, startDate, unknownEnd, endDate]);
 
-  const onSave = () => {
-    if (!canSubmit) {
+  const onSave = async () => {
+    if (!canSubmit || saving) {
       Alert.alert("Missing info", "Please fill in name and dates.");
       return;
     }
-    updateTrip(trip.id, {
-      name: name.trim(),
-      summary: summary.trim() || undefined,
-      startDate: toISODate(startDate),
-      endDate: unknownEnd ? null : toISODate(endDate),
-      privacy,
-      trackerEnabled,
-    } as any);
-    router.back();
+    try {
+      await updateTrip(trip.id, {
+        name: name.trim(),
+        summary: summary.trim() || undefined,
+        startDate: toISODate(startDate),
+        endDate: unknownEnd ? null : toISODate(endDate),
+        privacy,
+        trackerEnabled,
+      } as any);
+
+      router.back();
+    } catch (err) {
+      console.error("Failed to edit trip:", err);
+      Alert.alert("Error", "Failed to edit trip. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <View style={gs.screen}>
       <Text style={gs.h1}>Edit Trip</Text>
 
-      <Text style={gs.label}>Trip name</Text>
+      <Text style={gs.label}>
+        Trip name<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         placeholder="e.g., Alps 2026"
         value={name}
@@ -91,9 +126,13 @@ export default function EditTripScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>Start date</Text>
+      <Text style={gs.label}>
+        Start date<Text style={gs.asterisk}> *</Text>
+      </Text>
       <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>{startDate ? startDate.toDateString() : "Select start date"}</Text>
+        <Text style={gs.dateTxt}>
+          {startDate ? startDate.toDateString() : "Select start date"}
+        </Text>
       </Pressable>
 
       <View style={[gs.rowBetween, { marginTop: 6 }]}>
@@ -103,9 +142,13 @@ export default function EditTripScreen() {
 
       {!unknownEnd && (
         <>
-          <Text style={gs.label}>End date</Text>
+          <Text style={gs.label}>
+            End date<Text style={gs.asterisk}> *</Text>
+          </Text>
           <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-            <Text style={gs.dateTxt}>{endDate ? endDate.toDateString() : "Select end date"}</Text>
+            <Text style={gs.dateTxt}>
+              {endDate ? endDate.toDateString() : "Select end date"}
+            </Text>
           </Pressable>
         </>
       )}
@@ -135,23 +178,32 @@ export default function EditTripScreen() {
 
       <Pressable
         style={[gs.primaryButton, !canSubmit && { opacity: 0.5 }]}
-        disabled={!canSubmit}
+        disabled={!canSubmit || saving}
         onPress={onSave}
       >
-        <Text style={gs.primaryButtonText}>Save</Text>
+        <Text style={gs.primaryButtonText}>
+          {saving ? "Saving..." : "Save"}
+        </Text>
       </Pressable>
 
       <DateTimePickerModal
         isVisible={showPicker === "start"}
         mode="date"
-        onConfirm={(d) => { setStartDate(d); if (endDate && d && endDate < d) setEndDate(null); setShowPicker(null); }}
+        onConfirm={(d) => {
+          setStartDate(d);
+          if (endDate && d && endDate < d) setEndDate(null);
+          setShowPicker(null);
+        }}
         onCancel={() => setShowPicker(null)}
         display={Platform.OS === "ios" ? "inline" : "default"}
       />
       <DateTimePickerModal
         isVisible={showPicker === "end"}
         mode="date"
-        onConfirm={(d) => { setEndDate(d); setShowPicker(null); }}
+        onConfirm={(d) => {
+          setEndDate(d);
+          setShowPicker(null);
+        }}
         onCancel={() => setShowPicker(null)}
         display={Platform.OS === "ios" ? "inline" : "default"}
       />

@@ -1,11 +1,19 @@
 // app/trips/create.tsx
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, Switch, Platform, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Switch,
+  Platform,
+  Alert,
+} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { TripPrivacy, TripStatus, useTrips } from "../../contexts/TripContext";
-import { getTheme } from "../../styles/colors";
-import { makeGlobalStyles } from "../../styles/globalStyles";
+import { TripPrivacy, TripStatus, useTrips } from "@/contexts/TripContext";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 import { useColorScheme } from "react-native";
 
 function toISODate(d: Date | undefined | null) {
@@ -27,6 +35,7 @@ export default function CreateTripScreen() {
   const [summary, setSummary] = useState("");
   const [privacy, setPrivacy] = useState<TripPrivacy>("private");
   const [trackerEnabled, setTrackerEnabled] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
@@ -42,23 +51,31 @@ export default function CreateTripScreen() {
     return true;
   }, [name, startDate, unknownEnd, endDate]);
 
-  const onCreate = () => {
-    if (!canSubmit) {
+  const onCreate = async () => {
+    if (!canSubmit || saving) {
       Alert.alert("Missing info", "Please fill in the trip name and dates.");
       return;
     }
+    try {
+      setSaving(true);
 
-    const newId = addTrip({
-      name: name.trim(),
-      summary: summary.trim() || undefined,
-      startDate: toISODate(startDate),
-      endDate: unknownEnd ? null : toISODate(endDate),
-      privacy,
-      trackerEnabled,
-      // steps array is created by the context; no need to pass here
-    } as any);
+      const newId = await addTrip({
+        name: name.trim(),
+        summary: summary.trim() || undefined,
+        startDate: toISODate(startDate),
+        endDate: unknownEnd ? null : toISODate(endDate),
+        privacy,
+        trackerEnabled,
+        // steps array is created by the context; no need to pass here
+      } as any);
 
-    router.replace(`/trips/${newId}`);
+      router.replace(`/trips/${newId}`);
+    } catch (err) {
+      console.error("Failed to create trip:", err);
+      Alert.alert("Error", "Failed to create trip. Please try again.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -66,7 +83,9 @@ export default function CreateTripScreen() {
       <Text style={gs.h1}>Create Trip</Text>
 
       {/* Name */}
-      <Text style={gs.label}>Trip name</Text>
+      <Text style={gs.label}>
+        Trip name<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         placeholder="e.g. Toronto 2025"
         value={name}
@@ -87,9 +106,13 @@ export default function CreateTripScreen() {
       />
 
       {/* Start date */}
-      <Text style={gs.label}>Start date</Text>
+      <Text style={gs.label}>
+        Start date<Text style={gs.asterisk}> *</Text>
+      </Text>
       <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>{startDate ? startDate.toDateString() : "Select start date"}</Text>
+        <Text style={gs.dateTxt}>
+          {startDate ? startDate.toDateString() : "Select start date"}
+        </Text>
       </Pressable>
 
       {/* End date / unknown */}
@@ -100,9 +123,13 @@ export default function CreateTripScreen() {
 
       {!unknownEnd && (
         <>
-          <Text style={gs.label}>End date</Text>
+          <Text style={gs.label}>
+            End date<Text style={gs.asterisk}> *</Text>
+          </Text>
           <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-            <Text style={gs.dateTxt}>{endDate ? endDate.toDateString() : "Select end date"}</Text>
+            <Text style={gs.dateTxt}>
+              {endDate ? endDate.toDateString() : "Select end date"}
+            </Text>
           </Pressable>
         </>
       )}
@@ -135,10 +162,12 @@ export default function CreateTripScreen() {
       {/* Submit */}
       <Pressable
         style={[gs.primaryButton, !canSubmit && { opacity: 0.5 }]}
-        disabled={!canSubmit}
+        disabled={!canSubmit || saving}
         onPress={onCreate}
       >
-        <Text style={gs.primaryButtonText}>Create Trip</Text>
+        <Text style={gs.primaryButtonText}>
+          {saving ? "Creating..." : "Create Trip"}
+        </Text>
       </Pressable>
 
       {/* Date pickers */}

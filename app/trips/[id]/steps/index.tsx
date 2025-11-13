@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, FlatList, Pressable } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useTrips } from "../../../../contexts/TripContext";
+import { useTrips } from "@/contexts/TripContext";
 
 export default function StepsIndex() {
   const { id } = useLocalSearchParams<{ id: string }>();

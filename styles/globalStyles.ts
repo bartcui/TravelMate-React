@@ -114,12 +114,16 @@ export const makeGlobalStyles = (t: Theme) =>
       borderWidth: 1,
       borderColor: "#e5e5e5",
     },
-    disabled:{
-      backgroundColor:"#f2f2f2",
-      color:"#666",
-      borderColor:"#ddd"
+    disabled: {
+      backgroundColor: "#f2f2f2",
+      color: "#666",
+      borderColor: "#ddd",
     },
-    scrollView:{
-      paddingBottom:40
-    }
+    scrollView: {
+      paddingBottom: 40,
+    },
+    asterisk: {
+      fontSize: 16,
+      color: "red",
+    },
   });

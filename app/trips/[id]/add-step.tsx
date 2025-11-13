@@ -1,13 +1,22 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, Switch, Platform, Alert, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Switch,
+  Platform,
+  Alert,
+  StyleSheet,
+} from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useTrips } from "../../../contexts/TripContext";
+import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
-import { getTheme } from "../../../styles/colors";
-import { makeGlobalStyles } from "../../../styles/globalStyles";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 import { useNavigation } from "expo-router";
-import { geocodePlace } from "../../../utils/geocode";
+import { geocodePlace } from "@/utils/geocode";
 
 function toISO(d: Date | null) {
   return d ? d.toISOString() : undefined;
@@ -17,7 +26,7 @@ function toShort(d?: Date | null) {
 }
 function diffDays(a: Date | null, b: Date | null) {
   if (!a || !b) return undefined;
-  const ms = Math.abs(b.setHours(0,0,0,0) - a.setHours(0,0,0,0));
+  const ms = Math.abs(b.setHours(0, 0, 0, 0) - a.setHours(0, 0, 0, 0));
   return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
@@ -31,7 +40,8 @@ export default function AddStepScreen() {
   const gs = makeGlobalStyles(t);
 
   const trip = getTripById(id!);
-  if (!trip) return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
+  if (!trip)
+    return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
 
   // form state
   const [place, setPlace] = useState("");
@@ -39,6 +49,7 @@ export default function AddStepScreen() {
   const [things, setThings] = useState("");
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
+  const [saving, setSaving] = useState(false);
 
   const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
 
@@ -48,52 +59,65 @@ export default function AddStepScreen() {
   const navigation = useNavigation();
 
   React.useEffect(() => {
-    navigation.setOptions({ title: "" }); 
+    navigation.setOptions({ title: "" });
   }, [navigation]);
 
   const onSubmit = async () => {
-    if (!canSubmit) {
-      Alert.alert("Missing info", "Please add at least the place name and a start date.");
+    if (!canSubmit || saving) {
+      Alert.alert(
+        "Missing info",
+        "Please add at least the place name and a start date."
+      );
       return;
     }
+    try {
+      let lat: number | null = null;
+      let lng: number | null = null;
 
-    let lat: number | null = null;
-    let lng: number | null = null;
+      // Try exact input; if that fails, try adding a country hint
+      const primary = await geocodePlace(place);
+      const fallback =
+        !primary && /,/.test(place) === false
+          ? await geocodePlace(`${place}, Canada`) // small bias since you’re in Toronto
+          : null;
 
-    // Try exact input; if that fails, try adding a country hint
-    const primary = await geocodePlace(place);
-    const fallback =
-      !primary && /,/.test(place) === false
-        ? await geocodePlace(`${place}, Canada`) // small bias since you’re in Toronto
-        : null;
+      const hit = primary || fallback;
+      if (hit) {
+        lat = hit.lat;
+        lng = hit.lng;
+        console.log("Geocoded via Mapbox:", place, lat, lng, "→", hit.name);
+      } else {
+        console.log("No geocode results for", place);
+      }
 
-    const hit = primary || fallback;
-    if (hit) {
-      lat = hit.lat;
-      lng = hit.lng;
-      console.log("Geocoded via Mapbox:", place, lat, lng, "→", hit.name);
-    } else {
-      console.log("No geocode results for", place);
+      const parts: string[] = [];
+      if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
+      if (things.trim()) parts.push(`To do: ${things.trim()}`);
+      if (start && end) {
+        const d = durationDays ?? 0;
+        parts.push(
+          `Duration: ${d} day${
+            d === 1 ? "" : "s"
+          } (${start.toDateString()} – ${end.toDateString()})`
+        );
+      }
+
+      await addStep(trip.id, {
+        title: place.trim(),
+        note: parts.join("\n"),
+        visitedAt: toISO(start),
+        endAt: end ? toISO(end) : undefined,
+        lat,
+        lng,
+      } as any);
+
+      router.back();
+    } catch (err) {
+      console.error("Failed to add trip-step:", err);
+      Alert.alert("Error", "Failed to add trip-step. Please try again.");
+    } finally {
+      setSaving(false);
     }
-
-    const parts: string[] = [];
-    if (whereStay.trim()) parts.push(`Stay: ${whereStay.trim()}`);
-    if (things.trim()) parts.push(`To do: ${things.trim()}`);
-    if (start && end) {
-      const d = durationDays ?? 0;
-      parts.push(`Duration: ${d} day${d === 1 ? "" : "s"} (${start.toDateString()} – ${end.toDateString()})`);
-    }
-
-    addStep(trip.id, {
-      title: place.trim(),
-      note: parts.join("\n"),
-      visitedAt: toISO(start),
-      endAt: end ? toISO(end) : undefined,
-      lat,
-      lng,
-    } as any);
-
-    router.back();
   };
 
   return (
@@ -122,7 +146,9 @@ export default function AddStepScreen() {
       </Pressable>
 
       {!!durationDays && (
-        <Text style={[gs.label, { marginTop: 6 }]}>{durationDays} day{durationDays === 1 ? "" : "s"}</Text>
+        <Text style={[gs.label, { marginTop: 6 }]}>
+          {durationDays} day{durationDays === 1 ? "" : "s"}
+        </Text>
       )}
 
       {/* Where to stay */}
@@ -149,10 +175,12 @@ export default function AddStepScreen() {
       {/* Submit */}
       <Pressable
         style={[gs.primaryButton, !canSubmit && { opacity: 0.5 }]}
-        disabled={!canSubmit}
+        disabled={!canSubmit || saving}
         onPress={onSubmit}
       >
-        <Text style={gs.primaryButtonText}>＋ Add Step</Text>
+        <Text style={gs.primaryButtonText}>
+          {saving ? "Adding..." : "＋ Add Step"}
+        </Text>
       </Pressable>
 
       {/* Pickers */}

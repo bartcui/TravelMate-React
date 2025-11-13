@@ -1,22 +1,24 @@
 import React, { useEffect, useMemo } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
 import { useLocalSearchParams, useNavigation } from "expo-router";
-import { useTrips } from "../../../contexts/TripContext";
+import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
-import { getTheme } from "../../../styles/colors";
-import { makeGlobalStyles } from "../../../styles/globalStyles";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 import { useRouter } from "expo-router";
 import { Alert } from "react-native";
-const router = useRouter();
+
 export default function TripDetailsScreen() {
   const scheme = useColorScheme();
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
 
+  const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getTripById } = useTrips();
 
+  //console.log("tripId", id);
   const trip = getTripById(id!);
   const steps = useMemo(() => trip?.steps ?? [], [trip]);
 
@@ -27,6 +29,7 @@ export default function TripDetailsScreen() {
     }
   }, [navigation, trip?.name]);
 
+  //console.log("trip: ", trip);
   if (!trip) return <Text style={{ padding: 16 }}>Trip not found.</Text>;
 
   const renderStep = ({ item }: { item: any }) => {
@@ -34,9 +37,13 @@ export default function TripDetailsScreen() {
     const end = item.endAt ? new Date(item.endAt) : null;
 
     return (
-      <Pressable onPress={() => router.push(`/trips/${trip.id}/steps/${item.id}/edit`)}>
+      <Pressable
+        onPress={() => router.push(`/trips/${trip.id}/steps/${item.id}/edit`)}
+      >
         <View style={styles(t).stepCard}>
-          <Text style={styles(t).stepTitle}>{item.title || "Untitled step"}</Text>
+          <Text style={styles(t).stepTitle}>
+            {item.title || "Untitled step"}
+          </Text>
           {(start || end) && (
             <Text style={styles(t).stepDate}>
               {start ? start.toDateString() : "—"}
@@ -55,7 +62,8 @@ export default function TripDetailsScreen() {
       <View style={styles(t).markerRow}>
         <Text style={styles(t).icon}>🏠</Text>
         <Text style={styles(t).markerText}>
-          Trip starts {trip.startDate ? new Date(trip.startDate).toDateString() : ""}
+          Trip starts{" "}
+          {trip.startDate ? new Date(trip.startDate).toDateString() : ""}
         </Text>
       </View>
 
@@ -74,13 +82,14 @@ export default function TripDetailsScreen() {
     </View>
   );
   const { removeTrip } = useTrips();
-  const router = useRouter();
+
   const Footer = () => (
     <View>
       <View style={[styles(t).markerRow, { marginTop: 12 }]}>
         <Text style={styles(t).icon}>🏁</Text>
         <Text style={styles(t).markerText}>
-          Trip finishes {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
+          Trip finishes{" "}
+          {trip.endDate ? new Date(trip.endDate).toDateString() : ""}
         </Text>
       </View>
 
@@ -89,7 +98,7 @@ export default function TripDetailsScreen() {
         style={gs.primaryButton}
         onPress={() => router.push(`/trips/${trip.id}/edit`)}
       >
-        <Text style={gs.primaryButtonText}>Save / Edit Trip</Text>
+        <Text style={gs.primaryButtonText}>Edit Trip</Text>
       </Pressable>
 
       <Pressable
@@ -101,8 +110,8 @@ export default function TripDetailsScreen() {
               text: "Delete",
               style: "destructive",
               onPress: () => {
-                removeTrip(trip.id);     // <-- from TripContext
-                router.replace("/");     // go back to Home
+                removeTrip(trip.id); // <-- from TripContext
+                router.replace("/"); // go back to Home
               },
             },
           ]);
@@ -149,7 +158,12 @@ const styles = (t: ReturnType<typeof getTheme>) =>
     },
     stepTitle: { fontWeight: "700", fontSize: 15, color: t.text },
     stepNote: { marginTop: 4, fontSize: 13, color: t.textMuted },
-    stepDate: { marginTop: 4, fontSize: 12, color: t.textMuted, fontStyle: "italic" },
+    stepDate: {
+      marginTop: 4,
+      fontSize: 12,
+      color: t.textMuted,
+      fontStyle: "italic",
+    },
 
     // Inline add-step row (left-aligned + text to the right)
     addInlineRow: {
@@ -166,6 +180,11 @@ const styles = (t: ReturnType<typeof getTheme>) =>
       alignItems: "center",
       justifyContent: "center",
     },
-    addPlus: { color: t.primaryOn, fontSize: 22, fontWeight: "800", lineHeight: 22 },
+    addPlus: {
+      color: t.primaryOn,
+      fontSize: 22,
+      fontWeight: "800",
+      lineHeight: 22,
+    },
     addInlineText: { color: t.text, fontSize: 14, fontWeight: "600" },
   });

@@ -51,10 +51,6 @@ export default function SettingsScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    navigation.setOptions({ title: "Profile" });
-  }, [navigation]);
-
   // Sync local form state from user + userDoc when they load/change
   useEffect(() => {
     if (!user) return;
@@ -260,7 +256,7 @@ export default function SettingsScreen() {
                   onPress={async () => {
                     try {
                       setSaving(true);
-                      await setAvatarId('_original_');
+                      await setAvatarId("_original_");
                       setPickerOpen(false);
                     } finally {
                       setSaving(false);
