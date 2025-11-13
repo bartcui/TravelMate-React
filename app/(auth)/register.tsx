@@ -51,7 +51,6 @@ export default function RegisterScreen() {
         photoURL: cred.user.photoURL ?? "",
         provider: "password",
       });
-      router.replace("/");
     } catch (e: any) {
       Alert.alert("Registration failed", e?.message ?? String(e));
     } finally {

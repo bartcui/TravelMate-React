@@ -14,17 +14,16 @@ import {
   ScrollView,
 } from "react-native";
 import { AVATARS } from "@/utils/userUtils";
-import { useNavigation } from "expo-router";
 import { useUser } from "@/contexts/UserContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { auth } from "@/firebaseConfig";
 import { sendPasswordResetEmail } from "firebase/auth";
-import { cleanStr, cleanEmail, cleanAge } from "@/utils/userUtils";
+import { cleanStr, cleanAge } from "@/utils/userUtils";
+import { router } from "expo-router";
 
 export default function SettingsScreen() {
-  const navigation = useNavigation();
   const {
     user,
     userDoc,
@@ -98,9 +97,14 @@ export default function SettingsScreen() {
       const chosenPhotoURL =
         avatarId == null ? user.photoURL : AVATARS[avatarId];
 
+      if (name==null || name==="") {
+        Alert.alert("Invalid Name", "Name can not be empty.");
+        return;
+      }
       if (name !== (user.displayName ?? userDoc?.displayName ?? "")) {
         updates.displayName = name.trim() || null;
       }
+
       if (chosenPhotoURL && chosenPhotoURL !== user.photoURL) {
         updates.photoURL = chosenPhotoURL;
       }
@@ -115,20 +119,32 @@ export default function SettingsScreen() {
       }
 
       // --- Validate extra fields before sending to Firestore via updateUserDoc ---
-      const trimmedCountry = cleanStr(country, 100);
-      const trimmedProvince = cleanStr(province, 100);
-      const trimmedCity = cleanStr(city, 100);
+      const trimmedCountry = cleanStr(country);
+      const trimmedProvince = cleanStr(province);
+      const trimmedCity = cleanStr(city);
       const ageStr = cleanAge(age);
 
-      if (trimmedCountry !== null && trimmedCountry.length > 100) {
+      if (trimmedCountry == null) {
+        Alert.alert("Invalid country", "Country can not be empty.");
+        return;
+      }
+      if (trimmedCountry.length > 100) {
         Alert.alert("Invalid country", "Country name is too long.");
         return;
       }
-      if (trimmedProvince !== null && trimmedProvince.length > 100) {
+      if (trimmedProvince == null) {
+        Alert.alert("Invalid province", "Province can not be empty.");
+        return;
+      }
+      if (trimmedProvince.length > 100) {
         Alert.alert("Invalid province", "Province name is too long.");
         return;
       }
-      if (trimmedCity !== null && trimmedCity.length > 100) {
+      if (trimmedCity == null) {
+        Alert.alert("Invalid city", "City can not be empty.");
+        return;
+      }
+      if (trimmedCity.length > 100) {
         Alert.alert("Invalid city", "City name is too long.");
         return;
       }
@@ -174,13 +190,14 @@ export default function SettingsScreen() {
       if (Object.keys(patch).length > 0) {
         updatesMade = true;
         //console.log("keys length:", Object.keys(patch).length );
-        await updateUserDoc(patch);
+        await updateUserDoc({ ...patch, hasCompletedOnboarding: true });
       }
       if (updatesMade) {
         Alert.alert("Saved", "Profile updated.");
       } else {
         Alert.alert("Saved", "No changes made.");
       }
+      router.replace("/");
     } catch (e: any) {
       console.warn("[SettingsScreen] onSave error:", e);
       Alert.alert(
@@ -319,7 +336,9 @@ export default function SettingsScreen() {
         keyboardType="email-address"
       />
 
-      <Text style={gs.label}>Name</Text>
+      <Text style={gs.label}>
+        Name<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         value={name}
         onChangeText={setName}
@@ -327,7 +346,9 @@ export default function SettingsScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>Country</Text>
+      <Text style={gs.label}>
+        Country<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         value={country}
         onChangeText={setCountry}
@@ -336,7 +357,9 @@ export default function SettingsScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>Province / State</Text>
+      <Text style={gs.label}>
+        Province / State<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         value={province}
         onChangeText={setProvince}
@@ -345,7 +368,9 @@ export default function SettingsScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>City</Text>
+      <Text style={gs.label}>
+        City<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         value={city}
         onChangeText={setCity}

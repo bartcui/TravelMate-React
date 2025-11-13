@@ -32,6 +32,7 @@ type UpdateProfileInput = {
 
 // firestore user document
 export type UserDoc = {
+  id: string | null;
   email: string | null;
   displayName: string | null;
   photoURL: string | null;
@@ -43,6 +44,7 @@ export type UserDoc = {
   city?: string | null;
   age?: number | null;
   photoOriginalURL: string | null;
+  hasCompletedOnboarding: boolean;
 };
 
 type UserContextValue = {
@@ -99,7 +101,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
     const attach = async () => {
       if (!user) {
-        setDocLoaded(true);
+        setDocLoaded(false);
         return;
       }
       const ref = doc(db, "users", user.uid);
@@ -111,23 +113,23 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       const exists = snap.exists;
       const data = snap.data() as UserDoc | undefined;
 
-      const needsPhotoOriginal =
-        !exists ||
-        data?.photoOriginalURL == null ||
-        data.photoOriginalURL === "";
-
-      if (!exists || needsPhotoOriginal) {
+      const needsOnboarding = !exists || data?.id == null || data.id === "";
+      // console.log("photoOriginalURL", !user.photoURL );
+      // console.log("NeedsOnboarding", needsOnboarding);
+      if (needsOnboarding) {
         await setDoc(
           ref,
           {
+            id: user.uid,
             email: user.email ?? null,
             displayName: user.displayName ?? null,
-            photoURL: user.photoURL ?? null,
-            photoOriginalURL: user.photoURL ?? null,
+            photoURL: !user.photoURL ? AVATARS["c0"] : user.photoURL,
+            photoOriginalURL: user.photoURL,
             country: null,
             province: null,
             city: null,
             age: null,
+            hasCompletedOnboarding: false,
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
           },
@@ -142,8 +144,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           setDocLoaded(true);
         },
         (err) => {
+          if (err.code === "permission-denied" && !auth.currentUser) {
+            setUserDoc(null);
+            setDocLoaded(false);
+            return;
+          }
           console.error("[UserContext] onSnapshot error:", err);
-          setDocLoaded(true);
+          setDocLoaded(false);
         }
       );
     };
@@ -219,7 +226,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       (avatarId && AVATARS[avatarId]) ??
       user?.photoURL ??
       userDoc?.photoURL ??
-      "https://i.pravatar.cc/100?img=12";
+      AVATARS["c0"];
     return src;
   }, [avatarId, user?.photoURL, userDoc?.photoURL]);
 

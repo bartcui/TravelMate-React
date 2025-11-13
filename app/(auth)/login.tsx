@@ -66,8 +66,6 @@ export default function LoginScreen() {
         photoURL: cred.user.photoURL || "",
         provider: "google",
       });
-
-      router.replace("/");
       return cred;
     } catch (error: any) {
       if (isErrorWithCode(error)) {
@@ -109,7 +107,6 @@ export default function LoginScreen() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      router.replace("/"); // redirect to home (index.tsx)
     } catch (error: any) {
       Alert.alert("Login failed", error.message);
     } finally {

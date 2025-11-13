@@ -5,9 +5,12 @@ import { UserProvider, useUser } from "@/contexts/UserContext";
 import { ActivityIndicator, View } from "react-native";
 
 function Gate({ children }: { children: React.ReactNode }) {
-  const { user, isLoaded } = useUser();
+  const { user, userDoc, isLoaded } = useUser();
   const segments = useSegments();
   const inAuthGroup = segments[0] === "(auth)";
+  const inProfile = segments[0] === "profile";
+  const needsOnboarding =
+    !!user && !!userDoc && userDoc.hasCompletedOnboarding !== true;
 
   // Still loading Firebase auth state
   if (!isLoaded) {
@@ -17,9 +20,23 @@ function Gate({ children }: { children: React.ReactNode }) {
       </View>
     );
   }
-  // When finished loading, no user, and not already in (auth) group → redirect to login
+  // console.log("segment:", segments[0]);
+  // console.log("needsOnboarding", needsOnboarding);
+  // console.log("user: ", !!user);
+  // console.log("inAuthGroup: ", inAuthGroup);
+  // Not logged in and not in auth → go to login
   if (!user && !inAuthGroup) {
     return <Redirect href="/login" />;
+  }
+
+  // Logged in, not finished onboarding, and not already on profile → go to profile
+  if (user && needsOnboarding && !inProfile) {
+    return <Redirect href="/profile" />;
+  }
+
+  // Logged in, onboarding done, but still on auth pages → send to home
+  if (user && !needsOnboarding && inAuthGroup) {
+    return <Redirect href="/" />;
   }
 
   // Otherwise, show the protected app
@@ -33,9 +50,11 @@ function RootLayoutInner() {
   return (
     <Gate>
       <TripProvider userId={user?.uid ?? null}>
-        <Stack screenOptions={{ headerShadowVisible: false }}>
+        <Stack
+          initialRouteName="index"
+          screenOptions={{ headerShadowVisible: false }}
+        >
           <Stack.Screen name="index" options={{ title: "Home" }} />
-          <Stack.Screen name="onboarding" options={{ title: "Welcome" }} />
           <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         </Stack>
