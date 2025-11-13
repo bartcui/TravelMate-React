@@ -92,13 +92,8 @@ export default function RegisterScreen() {
       />
 
       <TouchableOpacity onPress={() => router.replace("/login")}>
-        <Text style={styles.link}>Already have an account? Sign in</Text>
+        <Text style={gs.link}>Already have an account? Sign in</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-// ---------- Styles ----------
-const styles = StyleSheet.create({
-  link: { textAlign: "center", color: "#007bff" },
-});

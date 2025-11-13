@@ -1,5 +1,5 @@
 // app/settings/index.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,28 +9,32 @@ import {
   StyleSheet,
   Alert,
   ActivityIndicator,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
 } from "react-native";
+import { AVATARS } from "@/utils/userUtils";
 import { useNavigation } from "expo-router";
-import { useUser, AVATARS } from "../../contexts/UserContext";
+import { useUser } from "@/contexts/UserContext";
 import { useColorScheme } from "react-native";
-import { getTheme } from "../../styles/colors";
-import { makeGlobalStyles } from "../../styles/globalStyles";
+import { getTheme } from "@/styles/colors";
+import { makeGlobalStyles } from "@/styles/globalStyles";
 import { auth } from "@/firebaseConfig";
-import {
-  updateEmail,
-  updateProfile,
-  sendPasswordResetEmail,
-} from "firebase/auth";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { cleanStr, cleanEmail, cleanAge } from "@/utils/userUtils";
 
 export default function SettingsScreen() {
   const navigation = useNavigation();
   const {
     user,
+    userDoc,
     isLoaded,
     avatarId,
     setAvatarId,
     updateUserProfile,
+    updateUserDoc,
     signOutUser,
+    baseAvatarUri,
   } = useUser();
 
   const scheme = useColorScheme();
@@ -39,10 +43,35 @@ export default function SettingsScreen() {
 
   const [email, setEmail] = useState(user?.email ?? "");
   const [name, setName] = useState(user?.displayName ?? "");
+  const [country, setCountry] = useState("");
+  const [province, setProvince] = useState("");
+  const [city, setCity] = useState("");
+  const [age, setAge] = useState("");
+
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({ title: "Profile" });
   }, [navigation]);
+
+  // Sync local form state from user + userDoc when they load/change
+  useEffect(() => {
+    if (!user) return;
+
+    setEmail(userDoc?.email ?? user.email ?? "");
+    setName(userDoc?.displayName ?? user.displayName ?? "");
+
+    setCountry(userDoc?.country ?? "");
+    setProvince(userDoc?.province ?? "");
+    setCity(userDoc?.city ?? "");
+
+    if (typeof userDoc?.age === "number" && Number.isFinite(userDoc.age)) {
+      setAge(String(userDoc.age));
+    } else {
+      setAge("");
+    }
+  }, [user, userDoc]);
 
   if (!isLoaded) {
     return (
@@ -55,7 +84,6 @@ export default function SettingsScreen() {
   }
 
   if (!user) {
-    // Gate will redirect to /(auth)/login; we just render a lightweight state
     return (
       <View style={gs.screen}>
         <Text style={gs.label}>Not signed in.</Text>
@@ -65,41 +93,106 @@ export default function SettingsScreen() {
 
   const onSave = async () => {
     try {
+      setSaving(true);
+      let updatesMade = false;
+
+      // --- Auth profile updates (name, avatar/photoURL) ---
       const updates: { displayName?: string | null; photoURL?: string | null } =
         {};
       const chosenPhotoURL =
         avatarId == null ? user.photoURL : AVATARS[avatarId];
 
-      if (name !== user.displayName) updates.displayName = name.trim() || null;
-      if (chosenPhotoURL && chosenPhotoURL !== user.photoURL)
+      if (name !== (user.displayName ?? userDoc?.displayName ?? "")) {
+        updates.displayName = name.trim() || null;
+      }
+      if (chosenPhotoURL && chosenPhotoURL !== user.photoURL) {
         updates.photoURL = chosenPhotoURL;
+      }
 
       if (updates.displayName !== undefined || updates.photoURL !== undefined) {
+        updatesMade = true;
+        //console.log("Updates length:", updates);
         await updateUserProfile({
           displayName: updates.displayName,
           photoURL: updates.photoURL,
         });
       }
 
-      if (email.trim() && email.trim() !== (user.email ?? "")) {
-        try {
-          await updateEmail(user, email.trim());
-        } catch (e: any) {
-          // Commonly requires recent login
-          Alert.alert(
-            "Email not updated",
-            e?.message?.toString?.() ??
-              "We couldn’t update your email. You may need to sign in again (re-authentication is required for sensitive changes)."
-          );
-        }
+      // --- Validate extra fields before sending to Firestore via updateUserDoc ---
+      const trimmedCountry = cleanStr(country, 100);
+      const trimmedProvince = cleanStr(province, 100);
+      const trimmedCity = cleanStr(city, 100);
+      const ageStr = cleanAge(age);
+
+      if (trimmedCountry !== null && trimmedCountry.length > 100) {
+        Alert.alert("Invalid country", "Country name is too long.");
+        return;
+      }
+      if (trimmedProvince !== null && trimmedProvince.length > 100) {
+        Alert.alert("Invalid province", "Province name is too long.");
+        return;
+      }
+      if (trimmedCity !== null && trimmedCity.length > 100) {
+        Alert.alert("Invalid city", "City name is too long.");
+        return;
       }
 
-      Alert.alert("Saved", "Profile updated.");
+      let ageNumber: number | null = null;
+      if (ageStr !== null) {
+        const n = Number(ageStr);
+        ageNumber = n;
+      }
+      if (
+        ageNumber !== null &&
+        (!Number.isFinite(ageNumber) ||
+          !Number.isInteger(ageNumber) ||
+          ageNumber < 0 ||
+          ageNumber > 120)
+      ) {
+        Alert.alert(
+          "Invalid age",
+          "Please enter a whole number between 0 and 120."
+        );
+        return;
+      }
+
+      // Only send patch if it actually changes
+      const patch: any = {};
+      if (trimmedCountry !== userDoc?.country) {
+        patch.country = trimmedCountry || null;
+      }
+      if (trimmedProvince !== userDoc?.province) {
+        patch.province = trimmedProvince || null;
+      }
+      if (trimmedCity !== userDoc?.city) {
+        patch.city = trimmedCity || null;
+      }
+      const prevAgeStr =
+        typeof userDoc?.age === "number" && Number.isFinite(userDoc.age)
+          ? String(userDoc.age)
+          : "";
+      if (ageStr !== prevAgeStr) {
+        patch.age = ageStr === "" ? null : ageNumber;
+      }
+
+      if (Object.keys(patch).length > 0) {
+        updatesMade = true;
+        //console.log("keys length:", Object.keys(patch).length );
+        await updateUserDoc(patch);
+      }
+      if (updatesMade) {
+        Alert.alert("Saved", "Profile updated.");
+      } else {
+        Alert.alert("Saved", "No changes made.");
+      }
     } catch (e: any) {
+      console.warn("[SettingsScreen] onSave error:", e);
       Alert.alert(
         "Error",
         e?.message?.toString?.() ?? "Failed to update profile."
       );
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -123,14 +216,108 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={gs.screen}>
-      <Text style={gs.h1}>Your Profile</Text>
+    <ScrollView
+      style={gs.screen}
+      contentContainerStyle={gs.scrollView}
+      keyboardShouldPersistTaps="handled"
+    >
+      <Text style={[gs.label, { marginTop: 12 }]}>Avatar</Text>
+      <Pressable
+        style={[gs.avatarWrap]}
+        onPress={() => setPickerOpen(true)}
+        disabled={saving}
+      >
+        <Image source={{ uri: baseAvatarUri }} style={gs.avatarLarge} />
+        <Text style={[gs.label, { textAlign: "center", marginTop: 8 }]}>
+          Tap to change photo
+        </Text>
+      </Pressable>
 
+      {/* Avatar picker modal */}
+      <Modal
+        visible={pickerOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPickerOpen(false)}
+      >
+        <View style={gs.modalBackdrop}>
+          <View style={[gs.modalCard]}>
+            <Text style={[gs.h2, { marginBottom: 8 }]}>Choose an avatar</Text>
+
+            <View style={styles.grid}>
+              {userDoc?.photoOriginalURL ? (
+                <Pressable
+                  key="original"
+                  style={[
+                    styles.cell,
+                    { borderColor: t.border },
+                    userDoc.photoURL == userDoc.photoOriginalURL && {
+                      borderColor: t.primary,
+                      borderWidth: 2,
+                    },
+                  ]}
+                  disabled={saving}
+                  onPress={async () => {
+                    try {
+                      setSaving(true);
+                      await setAvatarId('_original_');
+                      setPickerOpen(false);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  <Image
+                    source={{ uri: userDoc.photoOriginalURL }}
+                    style={styles.img}
+                  />
+                </Pressable>
+              ) : null}
+              {Object.entries(AVATARS).map(([id, url]) => (
+                <Pressable
+                  key={id}
+                  style={[
+                    styles.cell,
+                    { borderColor: t.border },
+                    avatarId === id && {
+                      borderColor: t.primary,
+                      borderWidth: 2,
+                    },
+                  ]}
+                  disabled={saving}
+                  onPress={async () => {
+                    try {
+                      setSaving(true);
+                      await setAvatarId(id); // updates Firebase photoURL + reloads context
+                      setPickerOpen(false);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  <Image source={{ uri: url }} style={styles.img} />
+                </Pressable>
+              ))}
+            </View>
+
+            <Pressable
+              style={[gs.primaryButton, { marginTop: 12 }]}
+              onPress={() => setPickerOpen(false)}
+              disabled={saving}
+            >
+              <Text style={gs.primaryButtonText}>
+                {saving ? "Saving..." : "Cancel"}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
       <Text style={gs.label}>Email</Text>
       <TextInput
+        editable={false}
         value={email}
         onChangeText={setEmail}
-        style={gs.input}
+        style={[gs.input, gs.disabled]}
         placeholderTextColor={t.textMuted}
         autoCapitalize="none"
         keyboardType="email-address"
@@ -144,31 +331,55 @@ export default function SettingsScreen() {
         placeholderTextColor={t.textMuted}
       />
 
+      <Text style={gs.label}>Country</Text>
+      <TextInput
+        value={country}
+        onChangeText={setCountry}
+        style={gs.input}
+        placeholder="e.g., Canada"
+        placeholderTextColor={t.textMuted}
+      />
+
+      <Text style={gs.label}>Province / State</Text>
+      <TextInput
+        value={province}
+        onChangeText={setProvince}
+        style={gs.input}
+        placeholder="e.g., Ontario"
+        placeholderTextColor={t.textMuted}
+      />
+
+      <Text style={gs.label}>City</Text>
+      <TextInput
+        value={city}
+        onChangeText={setCity}
+        style={gs.input}
+        placeholder="e.g., Toronto"
+        placeholderTextColor={t.textMuted}
+      />
+
+      <Text style={gs.label}>Age</Text>
+      <TextInput
+        value={age}
+        onChangeText={setAge}
+        style={gs.input}
+        placeholder="e.g., 29"
+        placeholderTextColor={t.textMuted}
+        keyboardType="number-pad"
+      />
+
+      <TouchableOpacity onPress={onResetPassword}>
+        <Text style={gs.link}>Send Password Reset Email</Text>
+      </TouchableOpacity>
+
       <Pressable
-        style={[gs.primaryButton, { marginTop: 8 }]}
-        onPress={onResetPassword}
+        style={[gs.primaryButton, { marginTop: 16 }]}
+        onPress={onSave}
+        disabled={saving}
       >
-        <Text style={gs.primaryButtonText}>Send Password Reset Email</Text>
-      </Pressable>
-
-      <Text style={[gs.label, { marginTop: 12 }]}>Avatar</Text>
-      <View style={styles.grid}>
-        {Object.entries(AVATARS).map(([id, url]) => (
-          <Pressable
-            key={id}
-            style={[
-              styles.cell,
-              avatarId === id && { borderColor: t.primary, borderWidth: 2 },
-            ]}
-            onPress={() => setAvatarId(id as any)}
-          >
-            <Image source={{ uri: url }} style={styles.img} />
-          </Pressable>
-        ))}
-      </View>
-
-      <Pressable style={[gs.primaryButton, { marginTop: 16 }]} onPress={onSave}>
-        <Text style={gs.primaryButtonText}>Save Changes</Text>
+        <Text style={gs.primaryButtonText}>
+          {saving ? "Saving..." : "Save Changes"}
+        </Text>
       </Pressable>
 
       <Pressable
@@ -190,7 +401,7 @@ export default function SettingsScreen() {
       >
         <Text style={gs.primaryButtonText}>Sign Out</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 

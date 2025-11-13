@@ -1,5 +1,6 @@
 import React, {
   createContext,
+  use,
   useContext,
   useEffect,
   useMemo,
@@ -12,27 +13,49 @@ import {
   signOut as fbSignOut,
   updateProfile as fbUpdateProfile,
 } from "firebase/auth";
-import { auth } from "@/firebaseConfig";
+import { auth, db } from "@/firebaseConfig";
+import {
+  doc,
+  getDoc,
+  onSnapshot,
+  serverTimestamp,
+  setDoc,
+  Unsubscribe,
+} from "firebase/firestore";
+import { AVATARS } from "@/utils/userUtils";
 
-// Preset avatars you can extend
-export const AVATARS: Record<string, string> = {
-  c5: "https://api.dicebear.com/7.x/bottts/png?seed=Rover&size=128&background=%23E3F2FD",
-  c8: "https://api.dicebear.com/7.x/big-smile/png?seed=Sunny&size=128&background=%23F3E5F5",
-  c3: "https://api.dicebear.com/7.x/micah/png?seed=Trailblazer&size=128&background=%23EDE7F6",
-  c4: "https://api.dicebear.com/7.x/micah/png?seed=Voyager&size=128&background=%23FDE7E9",
-};
 const STORAGE_KEY = "tm_profile_v1";
 
 type UpdateProfileInput = {
   displayName?: string | null;
   photoURL?: string | null;
 };
+
+// firestore user document
+export type UserDoc = {
+  email: string | null;
+  displayName: string | null;
+  photoURL: string | null;
+  createdAt?: any;
+  updatedAt?: any;
+
+  country?: string | null;
+  province?: string | null;
+  city?: string | null;
+  age?: number | null;
+  photoOriginalURL: string | null;
+};
+
 type UserContextValue = {
   user: User | null;
+  /* firestore user document */
+  userDoc: UserDoc | null;
   avatarId: string | null;
-  setAvatarId: (id: string) => void;
+  setAvatarId: (id: string) => Promise<void>;
+  baseAvatarUri: string;
   updateUserProfile: (updates: UpdateProfileInput) => Promise<void>;
-  isLoaded: boolean;
+  updateUserDoc: (updates: Partial<UserDoc>) => Promise<void>;
+  isLoaded: boolean; //becomes true after initial load
   signOutUser: () => Promise<void>;
 };
 
@@ -40,12 +63,18 @@ const UserContext = createContext<UserContextValue | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [authLoaded, setAuthLoaded] = useState(false);
 
-  // Load from Firebase Auth
+  const [userDoc, setUserDoc] = useState<UserDoc | null>(null);
+  const [docLoaded, setDocLoaded] = useState(false);
+
+  // Auth State
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
+      setAuthLoaded(true);
+
+      //light weight cache for quick UI boot
       if (u) {
         await AsyncStorage.setItem(
           STORAGE_KEY,
@@ -59,20 +88,81 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       } else {
         await AsyncStorage.removeItem(STORAGE_KEY);
       }
-      setIsLoaded(true);
     });
-
     return unsubscribe;
   }, []);
 
-  //Map current photoURl back to avatarId if it matches
+  //fire store user doc subscription
+  useEffect(() => {
+    let unsub: Unsubscribe | undefined;
+    setUserDoc(null);
+    setDocLoaded(false);
+
+    const attach = async () => {
+      if (!user) {
+        setDocLoaded(true);
+        return;
+      }
+      const ref = doc(db, "users", user.uid);
+
+      //Exsure it exists at least once
+      const snap = await getDoc(ref);
+
+      //Check whether to add missing fields
+      const exists = snap.exists;
+      const data = snap.data() as UserDoc | undefined;
+
+      const needsPhotoOriginal =
+        !exists ||
+        data?.photoOriginalURL == null ||
+        data.photoOriginalURL === "";
+
+      if (!exists || needsPhotoOriginal) {
+        await setDoc(
+          ref,
+          {
+            email: user.email ?? null,
+            displayName: user.displayName ?? null,
+            photoURL: user.photoURL ?? null,
+            photoOriginalURL: user.photoURL ?? null,
+            country: null,
+            province: null,
+            city: null,
+            age: null,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+      }
+
+      unsub = onSnapshot(
+        ref,
+        (snapshot) => {
+          setUserDoc((snapshot.data() as UserDoc) ?? null);
+          setDocLoaded(true);
+        },
+        (err) => {
+          console.error("[UserContext] onSnapshot error:", err);
+          setDocLoaded(true);
+        }
+      );
+    };
+
+    attach();
+
+    return () => {
+      if (unsub) unsub();
+    };
+  }, [user?.uid]);
+
+  // Map current photoURL back to avatarId if it matches a preset
   const avatarId = useMemo(() => {
-    if (!user?.photoURL) return null;
-    const match = Object.entries(AVATARS).find(
-      ([_, url]) => url === user.photoURL
-    );
+    const photoURL = user?.photoURL ?? userDoc?.photoURL ?? null;
+    if (!photoURL) return null;
+    const match = Object.entries(AVATARS).find(([, url]) => url === photoURL);
     return match?.[0] ?? null;
-  }, [user?.photoURL]);
+  }, [user?.photoURL, userDoc?.photoURL]);
 
   // Helper: force-refresh the user from Firebase after profile updates
   const reloadAndSet = async () => {
@@ -85,31 +175,82 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const signOutUser = async () => {
     await fbSignOut(auth);
     setUser(null);
+    setUserDoc(null);
     await AsyncStorage.removeItem(STORAGE_KEY);
   };
 
+  //update both auth profile and user doc
   const updateUserProfile = async (updates: UpdateProfileInput) => {
     if (!auth.currentUser) return;
-    await fbUpdateProfile(auth.currentUser, updates);
-    await reloadAndSet(); // ensures user.photoURL/displayName refresh -> avatarId recalculates
+
+    await fbUpdateProfile(auth.currentUser, {
+      displayName: updates.displayName ?? null,
+      photoURL: updates.photoURL ?? null,
+    });
+
+    // sync Firestore with Auth changes
+    await updateUserDoc({
+      displayName: updates.displayName ?? null,
+      photoURL: updates.photoURL ?? null,
+      email: auth.currentUser.email ?? null,
+    });
+
+    await reloadAndSet();
   };
 
+  //Update fireStore User Doc
+  const updateUserDoc = async (patch: Partial<UserDoc>) => {
+    if (!user) return;
+
+    const ref = doc(db, "users", user.uid);
+
+    await setDoc(
+      ref,
+      {
+        ...patch,
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+  };
+
+  // Always a string, thanks to final fallback
+  const baseAvatarUri: string = useMemo(() => {
+    const src =
+      (avatarId && AVATARS[avatarId]) ??
+      user?.photoURL ??
+      userDoc?.photoURL ??
+      "https://i.pravatar.cc/100?img=12";
+    return src;
+  }, [avatarId, user?.photoURL, userDoc?.photoURL]);
+
   const setAvatarId = async (id: string) => {
-    const url = AVATARS[id];
+    let url: string | null = null;
+    if (id == "_original_") {
+      url = userDoc?.photoOriginalURL ?? null;
+    } else {
+      url = AVATARS[id];
+    }
     if (!url) throw new Error(`Unknown avatar id: ${id}`);
     await updateUserProfile({ photoURL: url });
   };
 
+  // isLoaded means: auth loaded AND (if signed in) the user doc has loaded at least once
+  const isLoaded = authLoaded && (!!user ? docLoaded : true);
+
   const value = useMemo<UserContextValue>(
     () => ({
       user,
-      isLoaded,
+      userDoc,
       avatarId,
       setAvatarId,
+      baseAvatarUri,
       updateUserProfile,
+      updateUserDoc,
+      isLoaded,
       signOutUser,
     }),
-    [user, isLoaded, avatarId]
+    [user, userDoc, avatarId, baseAvatarUri, isLoaded]
   );
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

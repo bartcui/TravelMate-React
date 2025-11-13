@@ -1,7 +1,7 @@
 import { Stack, useSegments, Redirect } from "expo-router";
 import React from "react";
-import { TripProvider } from "../contexts/TripContext";
-import { UserProvider, useUser } from "../contexts/UserContext";
+import { TripProvider } from "@/contexts/TripContext";
+import { UserProvider, useUser } from "@/contexts/UserContext";
 import { ActivityIndicator, View } from "react-native";
 
 function Gate({ children }: { children: React.ReactNode }) {
@@ -34,10 +34,7 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShadowVisible: false }}>
             <Stack.Screen name="index" options={{ title: "Home" }} />
             <Stack.Screen name="onboarding" options={{ title: "Welcome" }} />
-            <Stack.Screen
-              name="profile/index"
-              options={{ title: "Profile" }}
-            />
+            <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           </Stack>
         </TripProvider>

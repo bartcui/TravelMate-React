@@ -1,5 +1,6 @@
 // Home Screen
 import React, { useState, useMemo } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import {
   View,
   Text,
@@ -14,7 +15,7 @@ import { useColorScheme } from "react-native";
 import { getTheme } from "../styles/colors";
 import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
-import { useUser, AVATARS } from "../contexts/UserContext";
+import { useUser } from "../contexts/UserContext";
 import MapPreview from "../components/MapPreview";
 
 export default function HomeScreen() {
@@ -25,12 +26,8 @@ export default function HomeScreen() {
   const router = useRouter();
   const { trips } = useTrips();
   const [pickerOpen, setPickerOpen] = useState(false);
-  const { user, avatarId } = useUser();
+  const { user, baseAvatarUri } = useUser();
   const displayName = user?.displayName || "Traveler";
-  const avatarUri: string =
-  (avatarId && AVATARS[avatarId]) ??
-  user?.photoURL ??
-  "https://i.pravatar.cc/100?img=12";
 
   const sortedTrips = useMemo(() => {
     // sort most recent startDate first; fallback to name
@@ -66,7 +63,7 @@ export default function HomeScreen() {
       {/* Header: avatar + name + settings */}
       <View style={styles(t).headerRow}>
         <View style={styles(t).profileRow}>
-          <Image source={{ uri: avatarUri }} style={styles(t).avatar} />
+          <Image source={{ uri: baseAvatarUri }} style={styles(t).avatar} />
           <View>
             <Text style={styles(t).hello}>Hello,</Text>
             <Text style={styles(t).name}>{displayName}</Text>
@@ -75,7 +72,13 @@ export default function HomeScreen() {
 
         <Link href="/profile" asChild>
           <Pressable style={styles(t).settingsBtn}>
-            <Text style={styles(t).settingsTxt}>⚙️</Text>
+            <Text style={styles(t).settingsTxt}>
+              <Ionicons
+                name="person-circle-outline"
+                size={32}
+                color="#4b5563"
+              />
+            </Text>
           </Pressable>
         </Link>
       </View>
