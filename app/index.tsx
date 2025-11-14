@@ -18,6 +18,7 @@ import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
 import { useUser } from "../contexts/UserContext";
 import MapPreview from "../components/MapPreview";
+import { getTripAlerts } from "../utils/notifications";
 import { sheetTop, panResponder } from "@/utils/homeUtils";
 
 export default function HomeScreen() {
@@ -27,12 +28,12 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const { trips } = useTrips();
+  const hasAlerts = React.useMemo(() => getTripAlerts(trips).length > 0, [trips]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { user, baseAvatarUri } = useUser();
   const displayName = user?.displayName || "Traveler";
 
   const sortedTrips = useMemo(() => {
-    // sort most recent startDate first; fallback to name
     return [...trips].sort((a, b) => {
       const da = a.startDate ? new Date(a.startDate).getTime() : 0;
       const db = b.startDate ? new Date(b.startDate).getTime() : 0;
@@ -80,7 +81,7 @@ export default function HomeScreen() {
         {/* Handle bar */}
         <View style={gs.sheetHandle} />
 
-        {/* Header: avatar + name + settings */}
+        {/* Header: avatar + name + settings + notification */}
         <View style={styles(t).headerRow}>
           <View style={styles(t).profileRow}>
             <Image source={{ uri: baseAvatarUri }} style={styles(t).avatar} />
@@ -101,7 +102,30 @@ export default function HomeScreen() {
               </Text>
             </Pressable>
           </Link>
-        </View>
+  
+        <Link href="/notifications" asChild>
+          <Pressable style={{ padding: 6 }}>
+            <View style={{ width: 24, height: 24 }}>
+              <Text style={{ fontSize: 20, lineHeight: 24 }}>🔔</Text>
+              {hasAlerts && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    right: -1,
+                    width: 9,
+                    height: 9,
+                    borderRadius: 5,
+                    backgroundColor: "#ff3b30",
+                    borderWidth: 1,
+                    borderColor: "white",
+                  }}
+                />
+              )}
+            </View>
+          </Pressable>
+        </Link>
+      </View>
         {/* Add Trip */}
         <Pressable style={gs.primaryButton} onPress={() => setPickerOpen(true)}>
           <Text style={gs.primaryButtonText}>＋ Add Trip</Text>
