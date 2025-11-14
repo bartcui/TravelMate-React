@@ -8,6 +8,7 @@ import { makeGlobalStyles } from "../styles/globalStyles";
 import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
 import { useUser, AVATARS } from "../contexts/UserContext";
 import MapPreview from "../components/MapPreview";
+import { getTripAlerts } from "../utils/notifications";
 
 export default function HomeScreen() {
   const scheme = useColorScheme();
@@ -16,13 +17,13 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const { trips } = useTrips();
+  const hasAlerts = React.useMemo(() => getTripAlerts(trips).length > 0, [trips]);
   const [pickerOpen, setPickerOpen] = useState(false);
   const { profile } = useUser();
   const displayName = profile?.name || "Traveler";
   const avatarUri = profile ? AVATARS[profile.avatarId] : "https://i.pravatar.cc/100?img=12";
 
   const sortedTrips = useMemo(() => {
-    // sort most recent startDate first; fallback to name
     return [...trips].sort((a, b) => {
       const da = a.startDate ? new Date(a.startDate).getTime() : 0;
       const db = b.startDate ? new Date(b.startDate).getTime() : 0;
@@ -49,7 +50,7 @@ export default function HomeScreen() {
 
   return (
     <View style={gs.screen}>
-      {/* Header: avatar + name + settings */}
+      {/* Header: avatar + name + settings + notification */}
       <View style={styles(t).headerRow}>
         <View style={styles(t).profileRow}>
           <Image source={{ uri: avatarUri }} style={styles(t).avatar} />
@@ -62,6 +63,29 @@ export default function HomeScreen() {
         <Link href="/settings" asChild>
           <Pressable style={styles(t).settingsBtn}>
             <Text style={styles(t).settingsTxt}>⚙️</Text>
+          </Pressable>
+        </Link>
+
+        <Link href="/notifications" asChild>
+          <Pressable style={{ padding: 6 }}>
+            <View style={{ width: 24, height: 24 }}>
+              <Text style={{ fontSize: 20, lineHeight: 24 }}>🔔</Text>
+              {hasAlerts && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: -1,
+                    right: -1,
+                    width: 9,
+                    height: 9,
+                    borderRadius: 5,
+                    backgroundColor: "#ff3b30",
+                    borderWidth: 1,
+                    borderColor: "white",
+                  }}
+                />
+              )}
+            </View>
           </Pressable>
         </Link>
       </View>

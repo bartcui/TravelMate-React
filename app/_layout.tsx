@@ -37,6 +37,7 @@ export default function RootLayout() {
             <Stack.Screen name="trips/[id]/add-step" options={{ title: "Add Step" }} />
             <Stack.Screen name="trips/[id]/steps/[stepId]/edit" options={{ title: "Edit Step" }} />
             <Stack.Screen name="settings/index" options={{ title: "Settings" }} />
+            <Stack.Screen name="notifications/index" options={{ title: "Notifications" }} />
           </Stack>
         </Gate>
       </TripProvider>
