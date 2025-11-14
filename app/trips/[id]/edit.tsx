@@ -1,5 +1,5 @@
 // app/trips/[id]/edit.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -24,7 +24,6 @@ function parseISO(s?: string | null) {
 }
 
 export default function EditTripScreen() {
-  const navigation = useNavigation();
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
 
@@ -55,12 +54,6 @@ export default function EditTripScreen() {
   );
   const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
   const [saving, setSaving] = useState(false);
-
-  useEffect(() => {
-    navigation.setOptions({
-      title: trip?.name ? `Edit: ${trip.name}` : "Edit Trip",
-    });
-  }, [navigation, trip?.name]);
 
   if (!trip) {
     return (

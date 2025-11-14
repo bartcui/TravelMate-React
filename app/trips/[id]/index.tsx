@@ -1,6 +1,6 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { View, Text, FlatList, Pressable, StyleSheet } from "react-native";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
@@ -14,20 +14,12 @@ export default function TripDetailsScreen() {
   const gs = makeGlobalStyles(t);
 
   const router = useRouter();
-  const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { getTripById } = useTrips();
 
   //console.log("tripId", id);
   const trip = getTripById(id!);
   const steps = useMemo(() => trip?.steps ?? [], [trip]);
-
-  // Set the header title to the trip name
-  useEffect(() => {
-    if (trip?.name) {
-      navigation.setOptions({ title: trip.name });
-    }
-  }, [navigation, trip?.name]);
 
   //console.log("trip: ", trip);
   if (!trip) return <Text style={{ padding: 16 }}>Trip not found.</Text>;

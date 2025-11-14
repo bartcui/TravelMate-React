@@ -46,7 +46,6 @@ function Gate({ children }: { children: React.ReactNode }) {
 // Inner layout that is allowed to use useUser()
 function RootLayoutInner() {
   const { user } = useUser();
-
   return (
     <Gate>
       <TripProvider userId={user?.uid ?? null}>
@@ -54,9 +53,14 @@ function RootLayoutInner() {
           initialRouteName="index"
           screenOptions={{ headerShadowVisible: false }}
         >
-          <Stack.Screen name="index" options={{ headerShown:false, title:"Home"}} />
+          <Stack.Screen
+            name="index"
+            options={{ headerShown: false, title: "Home" }}
+          />
           <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="trips/create" options={{ title: "Trips", headerShown: true }} />
+          <Stack.Screen name="trips/[id]" options={{ headerShown: false, title:"" }} />
         </Stack>
       </TripProvider>
     </Gate>

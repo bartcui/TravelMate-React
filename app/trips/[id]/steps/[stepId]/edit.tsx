@@ -1,5 +1,5 @@
 // app/trips/[id]/steps/[stepId]/edit.tsx
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useLayoutEffect } from "react";
 import {
   View,
   Text,
@@ -8,13 +8,15 @@ import {
   Alert,
   Platform,
 } from "react-native";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { geocodePlace } from "@/utils/geocode";
+import { HeaderBackButton, Label } from "@react-navigation/elements";
+import { useNavigation } from "expo-router";
 
 function toShort(d?: Date | null) {
   return d ? d.toDateString() : "Select date";
@@ -28,9 +30,9 @@ function parseISO(iso?: string | null) {
 
 export default function EditStepScreen() {
   const { id, stepId } = useLocalSearchParams<{ id: string; stepId: string }>();
-  const navigation = useNavigation();
   const router = useRouter();
   const { getTripById, updateStep, removeStep } = useTrips();
+  const navigation = useNavigation();
 
   const scheme = useColorScheme();
   const t = getTheme(scheme);
@@ -68,6 +70,18 @@ export default function EditStepScreen() {
     setStart(parseISO(step.visitedAt as any));
     setEnd(parseISO((step as any).endAt));
   }, [step]);
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerLeft: () => (
+        <HeaderBackButton
+          onPress={() => navigation.goBack()}
+          tintColor="#007AFF"
+          label="Back"
+        />
+      ),
+    });
+  }, []);
 
   const onSave = async () => {
     if (!trip || !step || saving) return;
@@ -164,15 +178,16 @@ export default function EditStepScreen() {
   if (!step) {
     return (
       <View style={[gs.screen, { justifyContent: "center" }]}>
-        <Text style={gs.label}>Step not found (it may have been deleted).</Text>
+        <Text style={gs.label}>
+          Destination not found (it may have been deleted).
+        </Text>
       </View>
     );
   }
 
   return (
     <View style={gs.screen}>
-      <Text style={gs.h1}>Edit Step</Text>
-
+      <Text style={gs.h1}>Edit Destination</Text>
       <Text style={gs.label}>
         City / Attraction<Text style={gs.asterisk}> *</Text>
       </Text>

@@ -15,7 +15,6 @@ import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
-import { useNavigation } from "expo-router";
 import { geocodePlace } from "@/utils/geocode";
 
 function toISO(d: Date | null) {
@@ -55,12 +54,6 @@ export default function AddStepScreen() {
 
   const durationDays = useMemo(() => diffDays(start, end), [start, end]);
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
-
-  const navigation = useNavigation();
-
-  React.useEffect(() => {
-    navigation.setOptions({ title: "" });
-  }, [navigation]);
 
   const onSubmit = async () => {
     if (!canSubmit || saving) {

@@ -14,7 +14,7 @@ export default function StepsIndex() {
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Text style={{ fontWeight: "800", fontSize: 18, marginBottom: 12 }}>
-        Destinatinos for {trip.name}
+        Destinations for {trip.name}
       </Text>
       <FlatList
         data={trip.steps}
