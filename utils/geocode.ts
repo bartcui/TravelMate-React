@@ -6,7 +6,7 @@ const TOKEN =
   (Constants.expoConfig as any)?.extra?.MAPBOX_TOKEN ||
   (Constants.manifest as any)?.extra?.MAPBOX_TOKEN; // fallback for classic
 
-const COUNTRY_BIAS = "CA,US"; // project purpose
+const COUNTRY_BIAS = "";
 
 export async function geocodePlace(place: string): Promise<GeocodeResult> {
   if (!TOKEN) {
