@@ -14,17 +14,23 @@ export default function StepsIndex() {
   return (
     <View style={{ flex: 1, padding: 16 }}>
       <Text style={{ fontWeight: "800", fontSize: 18, marginBottom: 12 }}>
-        Steps for {trip.name}
+        Destinatinos for {trip.name}
       </Text>
       <FlatList
         data={trip.steps}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => (
-          <Pressable onPress={() => router.push(`/trips/${trip.id}/steps/${item.id}/edit`)}>
-            <Text style={{ fontWeight: "700" }}>{item.title || "Untitled"}</Text>
+          <Pressable
+            onPress={() =>
+              router.push(`/trips/${trip.id}/steps/${item.id}/edit`)
+            }
+          >
+            <Text style={{ fontWeight: "700" }}>
+              {item.title || "Untitled"}
+            </Text>
           </Pressable>
         )}
-        ListEmptyComponent={<Text>No steps yet.</Text>}
+        ListEmptyComponent={<Text>No destinatinos yet.</Text>}
       />
     </View>
   );

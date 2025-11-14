@@ -6,7 +6,7 @@ export default function StepLayout() {
       <Stack.Screen
         name="edit"
         options={{
-          title: "Edit step",
+          title: "Edit destination",
         }}
       />
     </Stack>

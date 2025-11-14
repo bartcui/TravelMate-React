@@ -42,7 +42,7 @@ export default function TripDetailsScreen() {
       >
         <View style={styles(t).stepCard}>
           <Text style={styles(t).stepTitle}>
-            {item.title || "Untitled step"}
+            {item.title || "Untitled destination"}
           </Text>
           {(start || end) && (
             <Text style={styles(t).stepDate}>
@@ -76,7 +76,9 @@ export default function TripDetailsScreen() {
           <Text style={styles(t).addPlus}>＋</Text>
         </View>
         <Text style={styles(t).addInlineText}>
-          {steps.length === 0 ? "Start building your itinerary" : "Add step"}
+          {steps.length === 0
+            ? "Start building your itinerary"
+            : "Add destinations"}
         </Text>
       </Pressable>
     </View>

@@ -113,8 +113,8 @@ export default function AddStepScreen() {
 
       router.back();
     } catch (err) {
-      console.error("Failed to add trip-step:", err);
-      Alert.alert("Error", "Failed to add trip-step. Please try again.");
+      console.error("Failed to add trip-destination:", err);
+      Alert.alert("Error", "Failed to add trip-destination. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -122,10 +122,12 @@ export default function AddStepScreen() {
 
   return (
     <View style={gs.screen}>
-      <Text style={gs.h1}>Add Step</Text>
+      <Text style={gs.h1}>Add Destination</Text>
 
       {/* Place name */}
-      <Text style={gs.label}>City / Attraction<Text style={gs.asterisk}> *</Text></Text>
+      <Text style={gs.label}>
+        City / Attraction<Text style={gs.asterisk}> *</Text>
+      </Text>
       <TextInput
         placeholder="Main destination"
         value={place}
@@ -135,7 +137,9 @@ export default function AddStepScreen() {
       />
 
       {/* Dates */}
-      <Text style={gs.label}>Start date<Text style={gs.asterisk}> *</Text></Text>
+      <Text style={gs.label}>
+        Start date<Text style={gs.asterisk}> *</Text>
+      </Text>
       <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
         <Text style={gs.dateTxt}>{toShort(start)}</Text>
       </Pressable>
@@ -179,7 +183,7 @@ export default function AddStepScreen() {
         onPress={onSubmit}
       >
         <Text style={gs.primaryButtonText}>
-          {saving ? "Adding..." : "＋ Add Step"}
+          {saving ? "Adding..." : "＋ Add Destination"}
         </Text>
       </Pressable>
 
