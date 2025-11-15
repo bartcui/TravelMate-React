@@ -217,7 +217,7 @@ export default function MapPreview() {
                 numberOfLines={1}
                 ellipsizeMode="tail"
               >
-                Home
+                You are here
               </Text>
             </View>
           </Callout>
