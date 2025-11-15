@@ -78,7 +78,7 @@ export default function EditTripScreen() {
     try {
       await updateTrip(trip.id, {
         name: name.trim(),
-        summary: summary.trim() || undefined,
+        summary: summary.trim() || null,
         startDate: toISODate(startDate),
         endDate: unknownEnd ? null : toISODate(endDate),
         privacy,

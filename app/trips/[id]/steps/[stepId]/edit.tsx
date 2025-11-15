@@ -140,7 +140,7 @@ export default function EditStepScreen() {
         visitedAt: toISO(start),
         ...(end
           ? ({ endAt: toISO(end) } as any)
-          : ({ endAt: undefined } as any)),
+          : ({ endAt: null } as any)),
         ...(typeof nextLat === "number" && typeof nextLng === "number"
           ? ({ lat: nextLat, lng: nextLng } as any)
           : {}),

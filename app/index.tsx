@@ -28,7 +28,10 @@ export default function HomeScreen() {
 
   const router = useRouter();
   const { trips } = useTrips();
-  const hasAlerts = React.useMemo(() => getTripAlerts(trips).length > 0, [trips]);
+  const hasAlerts = React.useMemo(
+    () => getTripAlerts(trips).length > 0,
+    [trips]
+  );
   const [pickerOpen, setPickerOpen] = useState(false);
   const { user, baseAvatarUri } = useUser();
   const displayName = user?.displayName || "Traveler";
@@ -90,42 +93,47 @@ export default function HomeScreen() {
               <Text style={styles(t).name}>{displayName}</Text>
             </View>
           </View>
+          <View style={styles(t).rightIcons}>
+            <Link href="/profile" asChild>
+              <Pressable style={styles(t).settingsBtn}>
+                <Text style={styles(t).settingsTxt}>
+                  <Ionicons
+                    name="person-circle-outline"
+                    size={32}
+                    color="#4b5563"
+                  />
+                </Text>
+              </Pressable>
+            </Link>
 
-          <Link href="/profile" asChild>
-            <Pressable style={styles(t).settingsBtn}>
-              <Text style={styles(t).settingsTxt}>
-                <Ionicons
-                  name="person-circle-outline"
-                  size={32}
-                  color="#4b5563"
-                />
-              </Text>
-            </Pressable>
-          </Link>
-  
-        <Link href="/notifications" asChild>
-          <Pressable style={{ padding: 6 }}>
-            <View style={{ width: 24, height: 24 }}>
-              <Text style={{ fontSize: 20, lineHeight: 24 }}>🔔</Text>
-              {hasAlerts && (
-                <View
-                  style={{
-                    position: "absolute",
-                    top: -1,
-                    right: -1,
-                    width: 9,
-                    height: 9,
-                    borderRadius: 5,
-                    backgroundColor: "#ff3b30",
-                    borderWidth: 1,
-                    borderColor: "white",
-                  }}
-                />
-              )}
-            </View>
-          </Pressable>
-        </Link>
-      </View>
+            <Link href="/notifications" asChild>
+              <Pressable style={styles(t).settingsBtn}>
+                <Text style={styles(t).settingsTxt}>
+                  <Ionicons
+                    name="notifications-circle"
+                    size={32}
+                    color="#4b5563"
+                  />
+                </Text>
+                {hasAlerts && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 10,
+                      right: 10,
+                      width: 9,
+                      height: 9,
+                      borderRadius: 5,
+                      backgroundColor: "#ff3b30",
+                      borderWidth: 1,
+                      borderColor: "white",
+                    }}
+                  />
+                )}
+              </Pressable>
+            </Link>
+          </View>
+        </View>
         {/* Add Trip */}
         <Pressable style={gs.primaryButton} onPress={() => setPickerOpen(true)}>
           <Text style={gs.primaryButtonText}>＋ Add Trip</Text>
@@ -206,6 +214,11 @@ const styles = (t: ReturnType<typeof getTheme>) =>
       marginBottom: 12,
     },
     profileRow: { flexDirection: "row", alignItems: "center", gap: 12 },
+    rightIcons: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+    },
     avatar: { width: 44, height: 44, borderRadius: 22, marginRight: 8 },
     hello: { fontSize: 12, color: t.textMuted },
     name: { fontSize: 18, fontWeight: "700", color: t.text },

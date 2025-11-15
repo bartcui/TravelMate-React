@@ -52,6 +52,7 @@ export default ({ config }) => ({
       "expo-router",
       "@react-native-firebase/app",
       "@react-native-google-signin/google-signin",
+      "expo-notifications",
 
       [
         "react-native-maps",

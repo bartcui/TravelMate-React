@@ -1,8 +1,10 @@
 import { Stack, useSegments, Redirect } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { TripProvider } from "@/contexts/TripContext";
 import { UserProvider, useUser } from "@/contexts/UserContext";
 import { ActivityIndicator, View } from "react-native";
+import * as Notifications from "expo-notifications";
+import { initTripNotificationChannel } from "@/utils/notifications";
 
 function Gate({ children }: { children: React.ReactNode }) {
   const { user, userDoc, isLoaded } = useUser();
@@ -46,6 +48,20 @@ function Gate({ children }: { children: React.ReactNode }) {
 // Inner layout that is allowed to use useUser()
 function RootLayoutInner() {
   const { user } = useUser();
+  //init notifications
+  useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowBanner: true,
+        shouldPlaySound: true,
+        shouldShowList: true,
+        shouldSetBadge: false,
+      }),
+    });
+
+    initTripNotificationChannel();
+  }, []);
+
   return (
     <Gate>
       <TripProvider userId={user?.uid ?? null}>
@@ -59,8 +75,15 @@ function RootLayoutInner() {
           />
           <Stack.Screen name="profile/index" options={{ title: "Profile" }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="trips/create" options={{ title: "Trips", headerShown: true }} />
-          <Stack.Screen name="trips/[id]" options={{ headerShown: false, title:"" }} />
+          <Stack.Screen
+            name="trips/create"
+            options={{ title: "Trips", headerShown: true }}
+          />
+          <Stack.Screen
+            name="trips/[id]"
+            options={{ headerShown: false, title: "" }}
+          />
+          <Stack.Screen name="notifications/index" options={{ title: "" }} />
         </Stack>
       </TripProvider>
     </Gate>

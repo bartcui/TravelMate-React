@@ -37,14 +37,30 @@ export default function NotificationsScreen() {
           renderItem={({ item }) => (
             <Pressable
               onPress={() => router.push(`/trips/${item.tripId}`)}
-              style={[styles.card, { borderColor: t.border, backgroundColor: t.surface }]}
+              style={[
+                styles.card,
+                { borderColor: t.border, backgroundColor: t.surface },
+              ]}
             >
-              <Text style={[styles.title, { color: t.text }]}>{item.tripName}</Text>
+              <Text style={[styles.title, { color: t.text }]}>
+                {item.tripName}
+              </Text>
               <Text style={[styles.subtitle, { color: t.textMuted }]}>
                 {niceWhen(item)} ({new Date(item.startDateISO).toDateString()})
               </Text>
-              <Text style={[styles.badge, item.kind === "day" ? { backgroundColor: "#ff6b6b" } : { backgroundColor: "#f4a261" }]}>
-                {item.kind === "day" ? (item.daysUntil === 0 ? "Today" : "Tomorrow") : "This week"}
+              <Text
+                style={[
+                  styles.badge,
+                  item.kind === "day"
+                    ? { backgroundColor: "#ff6b6b" }
+                    : { backgroundColor: "#f4a261" },
+                ]}
+              >
+                {item.kind === "day"
+                  ? item.daysUntil === 0
+                    ? "Today"
+                    : "Tomorrow"
+                  : "This week"}
               </Text>
             </Pressable>
           )}

@@ -17,6 +17,10 @@ import {
   writeBatch,
 } from "firebase/firestore";
 import { db } from "@/firebaseConfig";
+import {
+  rescheduleTripNotificationsForTrip,
+  cancelTripNotifications,
+} from "@/utils/notifications";
 
 export type TripPrivacy = "private" | "friends" | "public";
 export type TripStatus = "past" | "current" | "future";
@@ -44,6 +48,7 @@ export type Trip = {
   privacy: TripPrivacy;
   trackerEnabled: boolean;
   steps: TripStep[];
+  notificationIds?: string[];
 };
 
 // helpers
@@ -166,9 +171,10 @@ export const TripProvider: React.FC<{
     const newTripRef = doc(collection(db, "users", userId, "trips"));
     const id = newTripRef.id;
 
-    const trip: Trip = {
+    let trip: Trip = {
       id,
       steps: [],
+      notificationIds: [],
       ...input,
     };
 
@@ -176,7 +182,18 @@ export const TripProvider: React.FC<{
       const { steps, ...tripDocData } = trip;
       await setDoc(newTripRef, tripDocData);
 
+      // schedule notifications for this new trip
+      const newNotificationIds = await rescheduleTripNotificationsForTrip(trip);
+
+      if (newNotificationIds) {
+        trip = { ...trip, notificationIds: newNotificationIds };
+        // persist ids back into Firestore
+        await updateDoc(newTripRef, { notificationIds: newNotificationIds });
+      }
+
+      // update state with final version (with notificationIds)
       setTrips((prev) => [trip, ...prev]);
+
       return id;
     } catch (err: any) {
       console.error("Failed to add trip:", err);
@@ -188,13 +205,31 @@ export const TripProvider: React.FC<{
   const updateTrip: TripContextValue["updateTrip"] = async (id, patch) => {
     if (!userId || !tripsCollectionRef) return;
 
+    // find the current trip so we know its existing notificationIds
+    const current = trips.find((t) => t.id === id);
+    if (!current) return;
+
     try {
       const tripRef = doc(tripsCollectionRef, id);
       await updateDoc(tripRef, patch as any);
 
-      setTrips((prev) =>
-        prev.map((t) => (t.id === id ? { ...t, ...patch } : t))
+      const updatedTrip: Trip = {
+        ...current,
+        ...patch,
+      };
+
+      // reschedule notifications for THIS trip only
+      const newNotificationIds = await rescheduleTripNotificationsForTrip(
+        updatedTrip
       );
+
+      if (newNotificationIds) {
+        updatedTrip.notificationIds = newNotificationIds;
+        await updateDoc(tripRef, { notificationIds: newNotificationIds });
+      }
+
+      // update local state
+      setTrips((prev) => prev.map((t) => (t.id === id ? updatedTrip : t)));
     } catch (err: any) {
       console.error("Failed to update trip:", err);
       Alert.alert("Error", "Failed to update trip.");
@@ -204,6 +239,8 @@ export const TripProvider: React.FC<{
 
   const removeTrip: TripContextValue["removeTrip"] = async (id) => {
     if (!userId || !tripsCollectionRef) return;
+
+    const target = trips.find((t) => t.id === id);
 
     try {
       const tripRef = doc(tripsCollectionRef, id);
@@ -216,6 +253,11 @@ export const TripProvider: React.FC<{
       batch.delete(tripRef);
 
       await batch.commit();
+
+      // cancel notifications only for this trip
+      if (target?.notificationIds?.length) {
+        await cancelTripNotifications(target.notificationIds);
+      }
 
       setTrips((prev) => prev.filter((t) => t.id !== id));
     } catch (err: any) {
