@@ -1,27 +1,13 @@
 // app/trips/[id]/edit.tsx
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Switch,
-  Platform,
-  Alert,
-} from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { View, Text, TextInput, Pressable, Switch, Alert } from "react-native";
+import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTrips, TripPrivacy } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
-
-function toISODate(d: Date | undefined | null) {
-  return d ? d.toISOString() : undefined;
-}
-function parseISO(s?: string | null) {
-  return s ? new Date(s) : null;
-}
+import { toISO, parseISO } from "@/utils/dateUtils";
 
 export default function EditTripScreen() {
   const router = useRouter();
@@ -49,10 +35,6 @@ export default function EditTripScreen() {
   const [endDate, setEndDate] = useState<Date | null>(
     parseISO(trip?.endDate ?? undefined)
   );
-  const [unknownEnd, setUnknownEnd] = useState<boolean>(
-    trip?.endDate ? false : true
-  );
-  const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
   const [saving, setSaving] = useState(false);
 
   if (!trip) {
@@ -66,9 +48,8 @@ export default function EditTripScreen() {
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!startDate) return false;
-    if (!unknownEnd && !endDate) return false;
     return true;
-  }, [name, startDate, unknownEnd, endDate]);
+  }, [name, startDate, endDate]);
 
   const onSave = async () => {
     if (!canSubmit || saving) {
@@ -79,8 +60,8 @@ export default function EditTripScreen() {
       await updateTrip(trip.id, {
         name: name.trim(),
         summary: summary.trim() || null,
-        startDate: toISODate(startDate),
-        endDate: unknownEnd ? null : toISODate(endDate),
+        startDate: toISO(startDate),
+        endDate: toISO(endDate),
         privacy,
         trackerEnabled,
       } as any);
@@ -109,6 +90,17 @@ export default function EditTripScreen() {
         placeholderTextColor={t.textMuted}
       />
 
+      <TripCalendarRangePicker
+        startDate={startDate}
+        endDate={endDate}
+        allowPast={trip?.tripStatus === "past" ? true : false}
+        label="Select your trip dates"
+        onChange={({ startDate, endDate }) => {
+          setStartDate(startDate);
+          setEndDate(endDate);
+        }}
+      />
+
       <Text style={gs.label}>Short summary</Text>
       <TextInput
         placeholder="Optional — a few words about this trip"
@@ -118,33 +110,6 @@ export default function EditTripScreen() {
         multiline
         placeholderTextColor={t.textMuted}
       />
-
-      <Text style={gs.label}>
-        Start date<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>
-          {startDate ? startDate.toDateString() : "Select start date"}
-        </Text>
-      </Pressable>
-
-      <View style={[gs.rowBetween, { marginTop: 6 }]}>
-        <Text style={gs.label}>I don't know the end date yet</Text>
-        <Switch value={unknownEnd} onValueChange={setUnknownEnd} />
-      </View>
-
-      {!unknownEnd && (
-        <>
-          <Text style={gs.label}>
-            End date<Text style={gs.asterisk}> *</Text>
-          </Text>
-          <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-            <Text style={gs.dateTxt}>
-              {endDate ? endDate.toDateString() : "Select end date"}
-            </Text>
-          </Pressable>
-        </>
-      )}
 
       <Text style={[gs.label, { marginTop: 8 }]}>Privacy</Text>
       <View style={gs.chipsRow}>
@@ -178,28 +143,6 @@ export default function EditTripScreen() {
           {saving ? "Saving..." : "Save"}
         </Text>
       </Pressable>
-
-      <DateTimePickerModal
-        isVisible={showPicker === "start"}
-        mode="date"
-        onConfirm={(d) => {
-          setStartDate(d);
-          if (endDate && d && endDate < d) setEndDate(null);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
-      <DateTimePickerModal
-        isVisible={showPicker === "end"}
-        mode="date"
-        onConfirm={(d) => {
-          setEndDate(d);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
     </View>
   );
 }

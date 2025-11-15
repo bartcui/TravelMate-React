@@ -1,33 +1,13 @@
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Switch,
-  Platform,
-  Alert,
-  StyleSheet,
-} from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { geocodePlace } from "@/utils/geocode";
-
-function toISO(d: Date | null) {
-  return d ? d.toISOString() : undefined;
-}
-function toShort(d?: Date | null) {
-  return d ? d.toDateString() : "Select date";
-}
-function diffDays(a: Date | null, b: Date | null) {
-  if (!a || !b) return undefined;
-  const ms = Math.abs(b.setHours(0, 0, 0, 0) - a.setHours(0, 0, 0, 0));
-  return Math.floor(ms / (1000 * 60 * 60 * 24));
-}
+import { parseISO, toISO, diffDays } from "@/utils/dateUtils";
 
 export default function AddStepScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -49,8 +29,6 @@ export default function AddStepScreen() {
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
-
-  const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
 
   const durationDays = useMemo(() => diffDays(start, end), [start, end]);
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
@@ -130,20 +108,21 @@ export default function AddStepScreen() {
       />
 
       {/* Dates */}
-      <Text style={gs.label}>
-        Start date<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>{toShort(start)}</Text>
-      </Pressable>
-
-      <Text style={gs.label}>End date (optional)</Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-        <Text style={gs.dateTxt}>{toShort(end)}</Text>
-      </Pressable>
+      <TripCalendarRangePicker
+        startDate={start}
+        endDate={end}
+        minDate={parseISO(trip.startDate)}
+        maxDate={parseISO(trip.endDate)}
+        allowPast={trip?.tripStatus === "past" ? true : false}
+        label="Select your destination dates"
+        onChange={({ startDate, endDate }) => {
+          setStart(startDate);
+          setEnd(endDate);
+        }}
+      />
 
       {!!durationDays && (
-        <Text style={[gs.label, { marginTop: 6 }]}>
+        <Text style={[gs.label, gs.highlight]}>
           {durationDays} day{durationDays === 1 ? "" : "s"}
         </Text>
       )}
@@ -179,29 +158,6 @@ export default function AddStepScreen() {
           {saving ? "Adding..." : "＋ Add Destination"}
         </Text>
       </Pressable>
-
-      {/* Pickers */}
-      <DateTimePickerModal
-        isVisible={showPicker === "start"}
-        mode="date"
-        onConfirm={(d) => {
-          setStart(d);
-          if (end && d && end < d) setEnd(null);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
-      <DateTimePickerModal
-        isVisible={showPicker === "end"}
-        mode="date"
-        onConfirm={(d) => {
-          setEnd(d);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
     </View>
   );
 }

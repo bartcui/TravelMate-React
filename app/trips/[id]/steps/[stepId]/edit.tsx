@@ -1,32 +1,16 @@
 // app/trips/[id]/steps/[stepId]/edit.tsx
 import React, { useEffect, useMemo, useState, useLayoutEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Alert,
-  Platform,
-} from "react-native";
+import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useTrips } from "@/contexts/TripContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { geocodePlace } from "@/utils/geocode";
-import { HeaderBackButton, Label } from "@react-navigation/elements";
+import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
-
-function toShort(d?: Date | null) {
-  return d ? d.toDateString() : "Select date";
-}
-function toISO(d: Date | null) {
-  return d ? d.toISOString() : undefined;
-}
-function parseISO(iso?: string | null) {
-  return iso ? new Date(iso) : null;
-}
+import { parseISO, toISO } from "@/utils/dateUtils";
 
 export default function EditStepScreen() {
   const { id, stepId } = useLocalSearchParams<{ id: string; stepId: string }>();
@@ -51,7 +35,6 @@ export default function EditStepScreen() {
   const [things, setThings] = useState("");
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
-  const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
   const [saving, setSaving] = useState(false);
 
   // Hydrate state whenever `step` changes (first load or edit another step)
@@ -138,9 +121,7 @@ export default function EditStepScreen() {
         title: place.trim(),
         note: parts.join("\n"),
         visitedAt: toISO(start),
-        ...(end
-          ? ({ endAt: toISO(end) } as any)
-          : ({ endAt: null } as any)),
+        ...(end ? ({ endAt: toISO(end) } as any) : ({ endAt: null } as any)),
         ...(typeof nextLat === "number" && typeof nextLng === "number"
           ? ({ lat: nextLat, lng: nextLng } as any)
           : {}),
@@ -199,17 +180,19 @@ export default function EditStepScreen() {
         placeholderTextColor={t.textMuted}
       />
 
-      <Text style={gs.label}>
-        Start date<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>{toShort(start)}</Text>
-      </Pressable>
-
-      <Text style={gs.label}>End date (optional)</Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-        <Text style={gs.dateTxt}>{toShort(end)}</Text>
-      </Pressable>
+      {/* Dates */}
+      <TripCalendarRangePicker
+        startDate={start}
+        endDate={end}
+        minDate={parseISO(trip.startDate)}
+        maxDate={parseISO(trip.endDate)}
+        allowPast={trip?.tripStatus === "past" ? true : false}
+        label="Select your destination dates"
+        onChange={({ startDate, endDate }) => {
+          setStart(startDate);
+          setEnd(endDate);
+        }}
+      />
 
       <Text style={gs.label}>Where to stay</Text>
       <TextInput
@@ -241,28 +224,6 @@ export default function EditStepScreen() {
       >
         <Text style={gs.primaryButtonText}>Delete</Text>
       </Pressable>
-
-      <DateTimePickerModal
-        isVisible={showPicker === "start"}
-        mode="date"
-        onConfirm={(d) => {
-          setStart(d);
-          if (end && d && end < d) setEnd(null);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
-      <DateTimePickerModal
-        isVisible={showPicker === "end"}
-        mode="date"
-        onConfirm={(d) => {
-          setEnd(d);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
     </View>
   );
 }

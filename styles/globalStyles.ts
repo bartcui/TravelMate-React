@@ -1,7 +1,7 @@
 // styles/globalStyles.ts
 import { StyleSheet } from "react-native";
 import type { Theme } from "./colors";
-import {SCREEN_HEIGHT} from "@/utils/homeUtils";
+import { SCREEN_HEIGHT } from "@/utils/homeUtils";
 
 export const makeGlobalStyles = (t: Theme) =>
   StyleSheet.create({
@@ -17,6 +17,7 @@ export const makeGlobalStyles = (t: Theme) =>
     // text
     h1: { fontSize: 22, fontWeight: "800", color: t.text, marginBottom: 12 },
     label: { fontSize: 13, color: t.text, marginTop: 8 },
+    highlight: { fontWeight: "bold" },
 
     //link
     link: { textAlign: "center", color: "#007bff" },
@@ -75,6 +76,18 @@ export const makeGlobalStyles = (t: Theme) =>
     chipTxtActive: { color: t.primaryOn },
 
     // buttons
+    buttonRow: {
+      flexDirection: "row",
+      marginTop: 16,
+      gap: 12,
+    },
+    button: {
+      flex: 1,
+      marginTop: 16,
+      paddingVertical: 14,
+      borderRadius: 12,
+      alignItems: "center",
+    },
     primaryButton: {
       marginTop: 16,
       backgroundColor: t.primary,
@@ -83,6 +96,13 @@ export const makeGlobalStyles = (t: Theme) =>
       alignItems: "center",
     },
     primaryButtonText: { color: t.primaryOn, fontWeight: "800" },
+    secondaryButton: {
+      backgroundColor: "#e5e7eb",
+    },
+    secondaryButtonText: {
+      color: "#111827",
+      fontWeight: "500",
+    },
     h2: { fontSize: 20, fontWeight: "700", color: t.text },
     avatarWrap: { alignItems: "center", marginTop: 12, marginBottom: 8 },
     avatarLarge: {
@@ -155,8 +175,8 @@ export const makeGlobalStyles = (t: Theme) =>
       shadowOffset: { width: 0, height: -2 },
       elevation: 5,
       paddingTop: 16,
-      paddingLeft:16,
-      paddingRight:16,
+      paddingLeft: 16,
+      paddingRight: 16,
       maxHeight: SCREEN_HEIGHT,
     },
     sheetHandle: {

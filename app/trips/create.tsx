@@ -1,24 +1,13 @@
 // app/trips/create.tsx
 import React, { useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Switch,
-  Platform,
-  Alert,
-} from "react-native";
-import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { View, Text, TextInput, Pressable, Switch, Alert } from "react-native";
+import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { TripPrivacy, TripStatus, useTrips } from "@/contexts/TripContext";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { useColorScheme } from "react-native";
-
-function toISODate(d: Date | undefined | null) {
-  return d ? d.toISOString() : undefined;
-}
+import { toISO } from "@/utils/dateUtils";
 
 export default function CreateTripScreen() {
   const scheme = useColorScheme();
@@ -39,17 +28,12 @@ export default function CreateTripScreen() {
 
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [unknownEnd, setUnknownEnd] = useState(initialStatus !== "past"); // default unknown for current/future
-
-  // pickers
-  const [showPicker, setShowPicker] = useState<null | "start" | "end">(null);
 
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!startDate) return false;
-    if (!unknownEnd && !endDate) return false;
     return true;
-  }, [name, startDate, unknownEnd, endDate]);
+  }, [name, startDate, endDate]);
 
   const onCreate = async () => {
     if (!canSubmit || saving) {
@@ -62,10 +46,11 @@ export default function CreateTripScreen() {
       const newId = await addTrip({
         name: name.trim(),
         summary: summary.trim() || null,
-        startDate: toISODate(startDate),
-        endDate: unknownEnd ? null : toISODate(endDate),
+        startDate: toISO(startDate),
+        endDate: toISO(endDate),
         privacy,
         trackerEnabled,
+        tripStatus: initialStatus,
         // steps array is created by the context; no need to pass here
       } as any);
 
@@ -94,6 +79,17 @@ export default function CreateTripScreen() {
         placeholderTextColor={t.textMuted}
       />
 
+      <TripCalendarRangePicker
+        startDate={startDate}
+        endDate={endDate}
+        allowPast={initialStatus === "past" ? true : false}
+        label="Select your trip dates"
+        onChange={({ startDate, endDate }) => {
+          setStartDate(startDate);
+          setEndDate(endDate);
+        }}
+      />
+
       {/* Summary */}
       <Text style={gs.label}>Short summary</Text>
       <TextInput
@@ -104,35 +100,6 @@ export default function CreateTripScreen() {
         multiline
         placeholderTextColor={t.textMuted}
       />
-
-      {/* Start date */}
-      <Text style={gs.label}>
-        Start date<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <Pressable style={gs.dateBtn} onPress={() => setShowPicker("start")}>
-        <Text style={gs.dateTxt}>
-          {startDate ? startDate.toDateString() : "Select start date"}
-        </Text>
-      </Pressable>
-
-      {/* End date / unknown */}
-      <View style={[gs.rowBetween, { marginTop: 6 }]}>
-        <Text style={gs.label}>I don't know the end date yet</Text>
-        <Switch value={unknownEnd} onValueChange={setUnknownEnd} />
-      </View>
-
-      {!unknownEnd && (
-        <>
-          <Text style={gs.label}>
-            End date<Text style={gs.asterisk}> *</Text>
-          </Text>
-          <Pressable style={gs.dateBtn} onPress={() => setShowPicker("end")}>
-            <Text style={gs.dateTxt}>
-              {endDate ? endDate.toDateString() : "Select end date"}
-            </Text>
-          </Pressable>
-        </>
-      )}
 
       {/* Privacy */}
       <Text style={[gs.label, { marginTop: 8 }]}>Privacy</Text>
@@ -169,30 +136,6 @@ export default function CreateTripScreen() {
           {saving ? "Creating..." : "Create Trip"}
         </Text>
       </Pressable>
-
-      {/* Date pickers */}
-      <DateTimePickerModal
-        isVisible={showPicker === "start"}
-        mode="date"
-        onConfirm={(d) => {
-          setStartDate(d);
-          // if end set and now < start, clear end to avoid invalid range
-          if (endDate && d && endDate < d) setEndDate(null);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
-      <DateTimePickerModal
-        isVisible={showPicker === "end"}
-        mode="date"
-        onConfirm={(d) => {
-          setEndDate(d);
-          setShowPicker(null);
-        }}
-        onCancel={() => setShowPicker(null)}
-        display={Platform.OS === "ios" ? "inline" : "default"}
-      />
     </View>
   );
 }

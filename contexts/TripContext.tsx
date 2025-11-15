@@ -49,6 +49,7 @@ export type Trip = {
   trackerEnabled: boolean;
   steps: TripStep[];
   notificationIds?: string[];
+  tripStatus: TripStatus | null;
 };
 
 // helpers

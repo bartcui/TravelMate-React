@@ -197,41 +197,43 @@ export async function rescheduleTripNotificationsForTrip(
   // 3 days before start (if there is still time before that moment)
   if (d >= 3) {
     const secondsUntilThreeDaysBefore = (d - 3) * SEC_DAY;
+    if (secondsUntilThreeDaysBefore > 0) {
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: buildNotificationContent({
+          ...alertBase,
+          daysUntil: 3,
+          kind: "week",
+        }),
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: secondsUntilThreeDaysBefore,
+          channelId: Platform.OS === "android" ? "trip-reminders" : undefined,
+        },
+      });
 
-    const identifier = await Notifications.scheduleNotificationAsync({
-      content: buildNotificationContent({
-        ...alertBase,
-        daysUntil: 3,
-        kind: "week",
-      }),
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: secondsUntilThreeDaysBefore,
-        channelId: Platform.OS === "android" ? "trip-reminders" : undefined,
-      },
-    });
-
-    newIds.push(identifier);
+      newIds.push(identifier);
+    }
   }
 
   // 1 day before start (if there is still at least 1 day to go)
   if (d >= 1) {
     const secondsUntilOneDayBefore = (d - 1) * SEC_DAY;
+    if (secondsUntilOneDayBefore > 0) {
+      const identifier = await Notifications.scheduleNotificationAsync({
+        content: buildNotificationContent({
+          ...alertBase,
+          daysUntil: 1,
+          kind: "day", // tomorrow
+        }),
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
+          seconds: secondsUntilOneDayBefore,
+          channelId: Platform.OS === "android" ? "trip-reminders" : undefined,
+        },
+      });
 
-    const identifier = await Notifications.scheduleNotificationAsync({
-      content: buildNotificationContent({
-        ...alertBase,
-        daysUntil: 1,
-        kind: "day", // tomorrow
-      }),
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: secondsUntilOneDayBefore,
-        channelId: Platform.OS === "android" ? "trip-reminders" : undefined,
-      },
-    });
-
-    newIds.push(identifier);
+      newIds.push(identifier);
+    }
   }
 
   return newIds;
