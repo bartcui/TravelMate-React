@@ -22,6 +22,16 @@ export const makeGlobalStyles = (t: Theme) =>
     //link
     link: { textAlign: "center", color: "#007bff" },
 
+    wrapper: {
+      marginTop: 8,
+    },
+    headerRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      marginBottom: 8,
+      gap: 8,
+    },
+
     // container
     container: {
       flex: 1,
@@ -186,5 +196,37 @@ export const makeGlobalStyles = (t: Theme) =>
       borderRadius: 2,
       backgroundColor: t.border,
       marginBottom: 8,
+    },
+    photosGrid: {
+      marginTop: 8,
+      flexDirection: "row",
+      flexWrap: "wrap",
+      gap: 6,
+    },
+
+    photoWrapper: {
+      width: 72,
+      height: 72,
+      borderRadius: 8,
+      overflow: "hidden",
+      backgroundColor: t.surface ?? "#e5e7eb",
+    },
+
+    photoThumb: {
+      width: "100%",
+      height: "100%",
+    },
+
+    extraOverlay: {
+      ...StyleSheet.absoluteFillObject,
+      backgroundColor: "rgba(0,0,0,0.45)",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+
+    extraText: {
+      color: "white",
+      fontWeight: "700",
+      fontSize: 14,
     },
   });

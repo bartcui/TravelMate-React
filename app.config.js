@@ -53,7 +53,7 @@ export default ({ config }) => ({
       "@react-native-firebase/app",
       "@react-native-google-signin/google-signin",
       "expo-notifications",
-
+      "expo-image-picker",
       [
         "react-native-maps",
         {

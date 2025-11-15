@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Platform, Text } from "react-native";
 import MapView, {
   Marker,
   PROVIDER_GOOGLE,
@@ -7,7 +6,15 @@ import MapView, {
   Region,
   Callout,
 } from "react-native-maps";
-import { StyleSheet, View } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  Platform,
+  Text,
+  Animated,
+  Easing,
+} from "react-native";
 import { useTrips } from "@/contexts/TripContext";
 import { geocodePlace } from "@/utils/geocode";
 import { useUser } from "@/contexts/UserContext";
@@ -20,6 +27,60 @@ const NORTH_AMERICA: Region = {
   latitudeDelta: 40,
   longitudeDelta: 90,
 };
+
+function StepPhotoMarker({
+  photo,
+  name,
+}: {
+  photo: string;
+  name?: string | null;
+}) {
+  const opacity = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 1,
+        duration: 220,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 1,
+        duration: 220,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [opacity, scale]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.markerWithCard,
+        {
+          opacity,
+          transform: [{ scale }],
+        },
+      ]}
+    >
+      <View style={styles.photoCard}>
+        <Image source={{ uri: photo }} style={styles.photo} />
+        {name ? (
+          <Text
+            style={styles.photoTitle}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {name}
+          </Text>
+        ) : null}
+      </View>
+      <View style={styles.cardArrow} />
+    </Animated.View>
+  );
+}
 
 export default function MapPreview() {
   const { trips } = useTrips();
@@ -75,6 +136,8 @@ export default function MapPreview() {
             lat: s.lat as number,
             lng: s.lng as number,
             name: s.title,
+            //first photo if exists
+            photo: s.photos?.[0] ?? null,
           }))
       ),
     [trips]
@@ -131,8 +194,13 @@ export default function MapPreview() {
           onPress={() =>
             router.push(`/trips/${m.tripId}/steps/${m.stepId}/edit`)
           }
+          anchor={{ x: 0.5, y: 1 }}
         >
-          <View style={styles.dot} />
+          {m.photo ? (
+            <StepPhotoMarker photo={m.photo} name={m.name} />
+          ) : (
+            <View style={styles.dot} />
+          )}
         </Marker>
       ))}
 
@@ -197,5 +265,41 @@ const styles = StyleSheet.create({
     // iOS only: stops wrapping
     // @ts-ignore
     whiteSpace: "nowrap",
+  },
+  markerWithCard: {
+    alignItems: "center",
+  },
+  photoCard: {
+    backgroundColor: "white",
+    borderRadius: 10,
+    overflow: "hidden",
+    width: 100,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4, // Android shadow
+  },
+  photo: {
+    width: "100%",
+    height: 80,
+  },
+  photoTitle: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#111827",
+  },
+  cardArrow: {
+    width: 0,
+    height: 0,
+    borderLeftWidth: 8,
+    borderRightWidth: 8,
+    borderTopWidth: 10,
+    borderLeftColor: "transparent",
+    borderRightColor: "transparent",
+    borderTopColor: "white", // same as card background
+    marginTop: -1,
   },
 });

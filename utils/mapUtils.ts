@@ -6,6 +6,8 @@ export type StepMarker = {
   stepId: string;
   lat: number;
   lng: number;
+  name?: string | null;
+  photo?: string | null;
 };
 
 const MIN_LAT_DELTA = 40;

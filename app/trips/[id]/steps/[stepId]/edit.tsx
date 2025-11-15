@@ -1,9 +1,17 @@
 // app/trips/[id]/steps/[stepId]/edit.tsx
 import React, { useEffect, useMemo, useState, useLayoutEffect } from "react";
-import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  ScrollView,
+} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useTrips } from "@/contexts/TripContext";
+import { useUser } from "@/contexts/UserContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
@@ -11,11 +19,13 @@ import { geocodePlace } from "@/utils/geocode";
 import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
 import { parseISO, toISO } from "@/utils/dateUtils";
+import { PhotoPickerGallery } from "@/components/PhotoPickerGallery";
 
 export default function EditStepScreen() {
   const { id, stepId } = useLocalSearchParams<{ id: string; stepId: string }>();
   const router = useRouter();
   const { getTripById, updateStep, removeStep } = useTrips();
+  const { user } = useUser();
   const navigation = useNavigation();
 
   const scheme = useColorScheme();
@@ -24,6 +34,11 @@ export default function EditStepScreen() {
 
   // Look up trip & step (pure values; no early returns!)
   const trip = getTripById(id!);
+  if (!trip)
+    return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
+  if (!user?.uid)
+    return <Text style={{ padding: 16, color: t.text }}>User not found.</Text>;
+
   const step = useMemo(
     () => trip?.steps.find((s) => s.id === stepId),
     [trip, stepId]
@@ -36,6 +51,7 @@ export default function EditStepScreen() {
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
+  const [photos, setPhotos] = useState<string[]>(step?.photos ?? []);
 
   // Hydrate state whenever `step` changes (first load or edit another step)
   useEffect(() => {
@@ -121,6 +137,7 @@ export default function EditStepScreen() {
         title: place.trim(),
         note: parts.join("\n"),
         visitedAt: toISO(start),
+        photos,
         ...(end ? ({ endAt: toISO(end) } as any) : ({ endAt: null } as any)),
         ...(typeof nextLat === "number" && typeof nextLng === "number"
           ? ({ lat: nextLat, lng: nextLng } as any)
@@ -148,6 +165,8 @@ export default function EditStepScreen() {
     ]);
   };
 
+  const storageBasePath = `users/${user.uid}/trips/${trip.id}/steps-uploads`;
+
   // Render fallbacks instead of early-returns to preserve hook order
   if (!trip) {
     return (
@@ -167,7 +186,7 @@ export default function EditStepScreen() {
   }
 
   return (
-    <View style={gs.screen}>
+    <ScrollView style={gs.screen}>
       <Text style={gs.h1}>Edit Destination</Text>
       <Text style={gs.label}>
         City / Attraction<Text style={gs.asterisk}> *</Text>
@@ -213,6 +232,14 @@ export default function EditStepScreen() {
         placeholderTextColor={t.textMuted}
       />
 
+      <PhotoPickerGallery
+        photos={photos}
+        onChange={setPhotos}
+        storageBasePath={storageBasePath}
+        title="Destination photos"
+        maxPhotos={12}
+      />
+
       <Pressable style={gs.primaryButton} onPress={onSave} disabled={saving}>
         <Text style={gs.primaryButtonText}>
           {saving ? "Saving..." : "Save"}
@@ -224,6 +251,6 @@ export default function EditStepScreen() {
       >
         <Text style={gs.primaryButtonText}>Delete</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }

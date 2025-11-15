@@ -3,16 +3,19 @@ import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTrips } from "@/contexts/TripContext";
+import { useUser } from "@/contexts/UserContext";
 import { useColorScheme } from "react-native";
 import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { geocodePlace } from "@/utils/geocode";
 import { parseISO, toISO, diffDays } from "@/utils/dateUtils";
+import { PhotoPickerGallery } from "@/components/PhotoPickerGallery";
 
 export default function AddStepScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { addStep, getTripById } = useTrips();
+  const { user } = useUser();
 
   const scheme = useColorScheme();
   const t = getTheme(scheme);
@@ -21,7 +24,8 @@ export default function AddStepScreen() {
   const trip = getTripById(id!);
   if (!trip)
     return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
-
+  if (!user?.uid)
+    return <Text style={{ padding: 16, color: t.text }}>User not found.</Text>;
   // form state
   const [place, setPlace] = useState("");
   const [whereStay, setWhereStay] = useState("");
@@ -29,6 +33,7 @@ export default function AddStepScreen() {
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const [saving, setSaving] = useState(false);
+  const [photos, setPhotos] = useState<string[]>([]);
 
   const durationDays = useMemo(() => diffDays(start, end), [start, end]);
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
@@ -80,6 +85,7 @@ export default function AddStepScreen() {
         endAt: end ? toISO(end) : null,
         lat,
         lng,
+        photos,
       } as any);
 
       router.back();
@@ -90,6 +96,8 @@ export default function AddStepScreen() {
       setSaving(false);
     }
   };
+
+  const storageBasePath = `users/${user.uid}/trips/${trip.id}/steps-uploads`;
 
   return (
     <View style={gs.screen}>
@@ -146,6 +154,14 @@ export default function AddStepScreen() {
         style={[gs.input, { height: 100 }]}
         multiline
         placeholderTextColor={t.textMuted}
+      />
+
+      <PhotoPickerGallery
+        photos={photos}
+        onChange={setPhotos}
+        storageBasePath={storageBasePath}
+        title="Destination photos"
+        maxPhotos={12}
       />
 
       {/* Submit */}
