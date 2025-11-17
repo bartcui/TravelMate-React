@@ -28,6 +28,10 @@ const NORTH_AMERICA: Region = {
   longitudeDelta: 90,
 };
 
+const CARD_WIDTH = 110;
+const CARD_HEIGHT = 90;
+const ARROW_HEIGHT = 8;
+
 function StepPhotoMarker({
   photo,
   name,
@@ -58,26 +62,31 @@ function StepPhotoMarker({
   return (
     <Animated.View
       style={[
-        styles.markerWithCard,
+        styles.markerRoot,
         {
           opacity,
           transform: [{ scale }],
         },
       ]}
     >
-      <View style={styles.photoCard}>
-        <Image source={{ uri: photo }} style={styles.photo} />
-        {name ? (
-          <Text
-            style={styles.photoTitle}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {name}
-          </Text>
-        ) : null}
-      </View>
+      {/* Arrow is at the very bottom – this is what sits on the coordinate */}
       <View style={styles.cardArrow} />
+
+      {/* Card is drawn above, but still inside the same container */}
+      <View style={styles.photoCardWrapper}>
+        <View style={styles.photoCard}>
+          <Image source={{ uri: photo }} style={styles.photo} />
+          {name ? (
+            <Text
+              style={styles.photoTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {name}
+            </Text>
+          ) : null}
+        </View>
+      </View>
     </Animated.View>
   );
 }
@@ -194,7 +203,7 @@ export default function MapPreview() {
           onPress={() =>
             router.push(`/trips/${m.tripId}/steps/${m.stepId}/edit`)
           }
-          anchor={{ x: 0.5, y: 1 }}
+          anchor={{ x: 0.5, y: 1 }} // bottom center is where the arrow tip is
         >
           {m.photo ? (
             <StepPhotoMarker photo={m.photo} name={m.name} />
@@ -273,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 10,
     overflow: "hidden",
-    width: 100,
+    width: CARD_WIDTH,
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 4,
@@ -282,7 +291,7 @@ const styles = StyleSheet.create({
   },
   photo: {
     width: "100%",
-    height: 80,
+    height: CARD_HEIGHT,
   },
   photoTitle: {
     paddingHorizontal: 8,
@@ -296,10 +305,21 @@ const styles = StyleSheet.create({
     height: 0,
     borderLeftWidth: 8,
     borderRightWidth: 8,
-    borderTopWidth: 10,
+    borderTopWidth: ARROW_HEIGHT,
     borderLeftColor: "transparent",
     borderRightColor: "transparent",
-    borderTopColor: "white", // same as card background
-    marginTop: -1,
+    borderTopColor: "white",
+  },
+  markerRoot: {
+    alignItems: "center",
+    justifyContent: "flex-end",
+    height: CARD_HEIGHT + ARROW_HEIGHT + 8, // enough to contain card + arrow
+    width: CARD_WIDTH,
+  },
+
+  // Card sits above the arrow, but still inside markerRoot
+  photoCardWrapper: {
+    position: "absolute",
+    bottom: ARROW_HEIGHT , // adjust this to move card up/down
   },
 });
