@@ -51,7 +51,6 @@ export const GooglePlacesInput: React.FC<Props> = React.memo(
         fullText = (place as any).text.text;
       }
       // Last resort: whatever is currently in the input
-r
 
       console.log("Selcted (AutoComplete):", fullText);
       // Send selected text to parent
