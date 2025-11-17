@@ -6,7 +6,7 @@ import {
   TextInput,
   Pressable,
   Alert,
-  ScrollView,
+  FlatList,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
@@ -20,6 +20,7 @@ import { HeaderBackButton } from "@react-navigation/elements";
 import { useNavigation } from "expo-router";
 import { parseISO, toISO } from "@/utils/dateUtils";
 import { PhotoPickerGallery } from "@/components/PhotoPickerGallery";
+import { GooglePlacesInput } from "@/components/PlacesAutoComplete";
 
 export default function EditStepScreen() {
   const { id, stepId } = useLocalSearchParams<{ id: string; stepId: string }>();
@@ -186,71 +187,84 @@ export default function EditStepScreen() {
   }
 
   return (
-    <ScrollView style={gs.screen}>
-      <Text style={gs.h1}>Edit Destination</Text>
-      <Text style={gs.label}>
-        City / Attraction<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <TextInput
-        placeholder="e.g., Tokyo Skytree"
-        value={place}
-        onChangeText={setPlace}
-        style={gs.input}
-        placeholderTextColor={t.textMuted}
-      />
+    <FlatList
+      data={[{ key: "form" }]}
+      keyExtractor={(item) => item.key}
+      keyboardShouldPersistTaps={"always"}
+      renderItem={() => (
+        <View style={gs.screen}>
+          <Text style={gs.h1}>Edit Destination</Text>
+          <Text style={gs.label}>
+            City / Attraction<Text style={gs.asterisk}> *</Text>
+          </Text>
 
-      {/* Dates */}
-      <TripCalendarRangePicker
-        startDate={start}
-        endDate={end}
-        minDate={parseISO(trip.startDate)}
-        maxDate={parseISO(trip.endDate)}
-        allowPast={trip?.tripStatus === "past" ? true : false}
-        label="Select your destination dates"
-        onChange={({ startDate, endDate }) => {
-          setStart(startDate);
-          setEnd(endDate);
-        }}
-      />
+          <GooglePlacesInput
+            placeholder="Main destination"
+            value={place}
+            onChange={setPlace}
+          />
 
-      <Text style={gs.label}>Where to stay</Text>
-      <TextInput
-        placeholder="Hotel / Hostel / Neighborhood"
-        value={whereStay}
-        onChangeText={setWhereStay}
-        style={gs.input}
-        placeholderTextColor={t.textMuted}
-      />
+          {/* Dates */}
+          <TripCalendarRangePicker
+            startDate={start}
+            endDate={end}
+            minDate={parseISO(trip.startDate)}
+            maxDate={parseISO(trip.endDate)}
+            allowPast={trip?.tripStatus === "past" ? true : false}
+            label="Select your destination dates"
+            onChange={({ startDate, endDate }) => {
+              setStart(startDate);
+              setEnd(endDate);
+            }}
+          />
 
-      <Text style={gs.label}>Things to see & do</Text>
-      <TextInput
-        placeholder="Bullet points or comma-separated list"
-        value={things}
-        onChangeText={setThings}
-        style={[gs.input, { height: 100 }]}
-        multiline
-        placeholderTextColor={t.textMuted}
-      />
+          <Text style={gs.label}>Where to stay</Text>
+          <TextInput
+            placeholder="Hotel / Hostel / Neighborhood"
+            value={whereStay}
+            onChangeText={setWhereStay}
+            style={gs.input}
+            placeholderTextColor={t.textMuted}
+          />
 
-      <PhotoPickerGallery
-        photos={photos}
-        onChange={setPhotos}
-        storageBasePath={storageBasePath}
-        title="Destination photos"
-        maxPhotos={12}
-      />
+          <Text style={gs.label}>Things to see & do</Text>
+          <TextInput
+            placeholder="Bullet points or comma-separated list"
+            value={things}
+            onChangeText={setThings}
+            style={[gs.input, { height: 100 }]}
+            multiline
+            placeholderTextColor={t.textMuted}
+          />
 
-      <Pressable style={gs.primaryButton} onPress={onSave} disabled={saving}>
-        <Text style={gs.primaryButtonText}>
-          {saving ? "Saving..." : "Save"}
-        </Text>
-      </Pressable>
-      <Pressable
-        style={[gs.primaryButton, { backgroundColor: "#eb5757", marginTop: 8 }]}
-        onPress={onDelete}
-      >
-        <Text style={gs.primaryButtonText}>Delete</Text>
-      </Pressable>
-    </ScrollView>
+          <PhotoPickerGallery
+            photos={photos}
+            onChange={setPhotos}
+            storageBasePath={storageBasePath}
+            title="Destination photos"
+            maxPhotos={12}
+          />
+
+          <Pressable
+            style={gs.primaryButton}
+            onPress={onSave}
+            disabled={saving}
+          >
+            <Text style={gs.primaryButtonText}>
+              {saving ? "Saving..." : "Save"}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={[
+              gs.primaryButton,
+              { backgroundColor: "#eb5757", marginTop: 8 },
+            ]}
+            onPress={onDelete}
+          >
+            <Text style={gs.primaryButtonText}>Delete</Text>
+          </Pressable>
+        </View>
+      )}
+    />
   );
 }

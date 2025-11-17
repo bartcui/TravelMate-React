@@ -1,5 +1,12 @@
 import React, { useMemo, useState } from "react";
-import { View, Text, TextInput, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Alert,
+  FlatList,
+} from "react-native";
 import { TripCalendarRangePicker } from "@/components/TripCalendarRangePicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTrips } from "@/contexts/TripContext";
@@ -10,6 +17,7 @@ import { makeGlobalStyles } from "@/styles/globalStyles";
 import { geocodePlace } from "@/utils/geocode";
 import { parseISO, toISO, diffDays } from "@/utils/dateUtils";
 import { PhotoPickerGallery } from "@/components/PhotoPickerGallery";
+import { GooglePlacesInput } from "@/components/PlacesAutoComplete";
 
 export default function AddStepScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -100,80 +108,85 @@ export default function AddStepScreen() {
   const storageBasePath = `users/${user.uid}/trips/${trip.id}/steps-uploads`;
 
   return (
-    <View style={gs.screen}>
-      <Text style={gs.h1}>Add Destination</Text>
+    <FlatList
+      data={[{ key: "form" }]}
+      keyExtractor={(item) => item.key}
+      keyboardShouldPersistTaps={"always"}
+      renderItem={() => (
+        <View style={gs.screen}>
+          <Text style={gs.h1}>Add Destination</Text>
 
-      {/* Place name */}
-      <Text style={gs.label}>
-        City / Attraction<Text style={gs.asterisk}> *</Text>
-      </Text>
-      <TextInput
-        placeholder="Main destination"
-        value={place}
-        onChangeText={setPlace}
-        style={gs.input}
-        placeholderTextColor={t.textMuted}
-      />
+          {/* Place name */}
+          <Text style={gs.label}>
+            City / Attraction<Text style={gs.asterisk}> *</Text>
+          </Text>
+          <GooglePlacesInput
+            placeholder="Main destination"
+            value={place}
+            onChange={setPlace}
+          />
 
-      {/* Dates */}
-      <TripCalendarRangePicker
-        startDate={start}
-        endDate={end}
-        minDate={parseISO(trip.startDate)}
-        maxDate={parseISO(trip.endDate)}
-        allowPast={trip?.tripStatus === "past" ? true : false}
-        label="Select your destination dates"
-        onChange={({ startDate, endDate }) => {
-          setStart(startDate);
-          setEnd(endDate);
-        }}
-      />
+          {/* Dates */}
+          <TripCalendarRangePicker
+            startDate={start}
+            endDate={end}
+            minDate={parseISO(trip.startDate)}
+            maxDate={parseISO(trip.endDate)}
+            allowPast={trip?.tripStatus === "past" ? true : false}
+            label="Select your destination dates"
+            onChange={({ startDate, endDate }) => {
+              setStart(startDate);
+              setEnd(endDate);
+            }}
+          />
 
-      {!!durationDays && (
-        <Text style={[gs.label, gs.highlight]}>
-          {durationDays} day{durationDays === 1 ? "" : "s"}
-        </Text>
+          {!!durationDays && (
+            <Text style={[gs.label, gs.highlight]}>
+              {durationDays} day{durationDays === 1 ? "" : "s"}
+            </Text>
+          )}
+
+          {/* Where to stay */}
+          <Text style={gs.label}>Where to stay</Text>
+          <TextInput
+            placeholder="Hotel / Hostel / Airbnb"
+            value={whereStay}
+            onChangeText={setWhereStay}
+            style={gs.input}
+            placeholderTextColor={t.textMuted}
+          />
+
+          {/* Things to see & do */}
+          <Text style={gs.label}>Things to see & do</Text>
+          <TextInput
+            placeholder="..."
+            value={things}
+            onChangeText={setThings}
+            style={[gs.input, { height: 100 }]}
+            multiline
+            placeholderTextColor={t.textMuted}
+          />
+
+          <PhotoPickerGallery
+            photos={photos}
+            onChange={setPhotos}
+            storageBasePath={storageBasePath}
+            title="Destination photos"
+            maxPhotos={12}
+          />
+
+          {/* Submit */}
+          <Pressable
+            style={[gs.primaryButton, !canSubmit && { opacity: 0.5 }]}
+            disabled={!canSubmit || saving}
+            onPress={onSubmit}
+          >
+            <Text style={gs.primaryButtonText}>
+              {saving ? "Adding..." : "＋ Add Destination"}
+            </Text>
+          </Pressable>
+        </View>
       )}
-
-      {/* Where to stay */}
-      <Text style={gs.label}>Where to stay</Text>
-      <TextInput
-        placeholder="Hotel / Hostel / Airbnb"
-        value={whereStay}
-        onChangeText={setWhereStay}
-        style={gs.input}
-        placeholderTextColor={t.textMuted}
-      />
-
-      {/* Things to see & do */}
-      <Text style={gs.label}>Things to see & do</Text>
-      <TextInput
-        placeholder="..."
-        value={things}
-        onChangeText={setThings}
-        style={[gs.input, { height: 100 }]}
-        multiline
-        placeholderTextColor={t.textMuted}
-      />
-
-      <PhotoPickerGallery
-        photos={photos}
-        onChange={setPhotos}
-        storageBasePath={storageBasePath}
-        title="Destination photos"
-        maxPhotos={12}
-      />
-
-      {/* Submit */}
-      <Pressable
-        style={[gs.primaryButton, !canSubmit && { opacity: 0.5 }]}
-        disabled={!canSubmit || saving}
-        onPress={onSubmit}
-      >
-        <Text style={gs.primaryButtonText}>
-          {saving ? "Adding..." : "＋ Add Destination"}
-        </Text>
-      </Pressable>
-    </View>
+    />
   );
 }

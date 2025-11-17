@@ -42,6 +42,7 @@ export default ({ config }) => ({
 
     extra: {
       MAPBOX_TOKEN: process.env.EXPO_PUBLIC_MAPBOX_TOKEN,
+      googlePlacesApiKey: process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY,
       router: {},
       eas: {
         projectId: "c410be8c-4ab7-4ac0-8163-8420a6259499",
