@@ -8,7 +8,6 @@ import { getTheme } from "@/styles/colors";
 import { makeGlobalStyles } from "@/styles/globalStyles";
 import { useColorScheme } from "react-native";
 import { toISO } from "@/utils/dateUtils";
-import { GooglePlacesInput } from "@/components/PlacesAutoComplete";
 
 export default function CreateTripScreen() {
   const scheme = useColorScheme();
@@ -79,7 +78,6 @@ export default function CreateTripScreen() {
         style={gs.input}
         placeholderTextColor={t.textMuted}
       />
-      <GooglePlacesInput />
 
       <TripCalendarRangePicker
         startDate={startDate}
