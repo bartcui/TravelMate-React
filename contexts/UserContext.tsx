@@ -44,7 +44,7 @@ export type UserDoc = {
   city?: string | null;
   age?: number | null;
   photoOriginalURL: string | null;
-  hasCompletedOnboarding: boolean;
+  hasCompletedOnboarding?: boolean;
 };
 
 type UserContextValue = {
