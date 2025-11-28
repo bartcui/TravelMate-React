@@ -96,36 +96,30 @@ router.push(`/trips/${trip.id}/steps/${step.id}/edit`)
 
 ##### **(3) State Management and Persistence**
 
-We will use **React Context API** combined with **useReducer** to manage the global state of trips.
+We used **React Context** and **useReducer** for global state management and AsyncStorage for app-wide persistence.
 The state will include:
 
 - A list of all trips.
-- Selected trip details.
-- User details
-- User preferences (e.g., dark or light theme).
+- All steps within trips.
+- User profile and selected avatar
+- Notification state
 
-Example:
+We implemented a central TripContext that stores the entire app’s trip/step state.
+**Features**:
 
-```ts
-type Trip = {
-  id: string;
-  title: string;
-  destination: string;
-  startDate: string;
-  endDate: string;
-  summary: string;
-  photoUri?: string; //concatenated string for multiple phone URIs
-};
+- Strongly typed reducer actions: ADD_TRIP, UPDATE_TRIP, REMOVE_TRIP, ADD_STEP, UPDATE_STEP, REMOVE_STEP
+- Actions defined as TypeScript unions
+- Global hooks: useTrips() for consuming context 
 
-type TripState = {
-  trips: Trip[];
-};
-```
+**AsyncStorage Persistence**
 
-**Reducer actions** will handle adding, editing, and deleting trips.
-The app state will be persisted using **React Native Async Storage**, ensuring that user data remains available even after restarting the app.
+On app startup:
 
-On app launch, the reducer will rehydrate the state from Async Storage.
+- State rehydrates from AsyncStorage
+- Reducer updates automatically update storage
+
+This guarantees persistence across:
+App reloads, Expo Go restarts, and Device restarts
 
 ---
 
