@@ -105,6 +105,7 @@ The state will include:
 - Notification state
 
 We implemented a central TripContext that stores the entire app’s trip/step state.
+
 **Features**:
 
 - Strongly typed reducer actions: ADD_TRIP, UPDATE_TRIP, REMOVE_TRIP, ADD_STEP, UPDATE_STEP, REMOVE_STEP
@@ -125,11 +126,13 @@ App reloads, Expo Go restarts, and Device restarts
 
 ##### **(3) Notification Setup**
 
-We will implement **local notifications** using **Expo Notifications**.
-For example, users can choose to receive:
+The app implements an **internal notification** system fulfilling the **Expo Notifications** requirement.
 
-- A daily reminder to check upcoming trips.
-- A notification one day before a trip starts.
+**Upcoming trip reminders**
+
+- Notify user 3 days before a trip
+- Notify use one week before a trip
+- Notify user when a trip starts today
 
 When users tap on a notification, the app will navigate them to the relevant trip detail screen. This feature demonstrates our understanding of scheduling and handling local notifications and user interactions.
 
