@@ -1,12 +1,12 @@
 ## **TravelMate – A Trip Planning Mobile App**
 
-### **1. Motivation**
+### **1. Introduction**
 
 Traveling is one of the most fulfilling ways to experience life and collecting memories that shape who we are. However, the way we plan and remember trips often feels fragmented. Many travelers still rely on spreadsheets, Google Docs, or notes to organize itineraries and reminders. These tools might work early on, but as the details grow, adding flights, checklists, restaurants, and maps etc, it becomes easy to lose track of everything. Even worse, once the trip begins, these tools rarely evolve into something that captures what the journey felt like. And while photos are the main way we document our experiences, our phone galleries quickly become a chaotic collection of hundreds of unorganized pictures. The emotional context, where the photo was taken, what we felt, who we were with often gets lost. Social media offers a glimpse of the highlights, but not a private, immersive way to revisit our memories.
 
-Our project, TravelMate, aims to bridge this gap by creating a travel companion that grows with you — from planning the trip to reliving it afterward. It simplifies travel organization, helps you track your journey in real time, and transforms your memories into an interactive, location-aware diary you can return to anytime. TravelMate isn’t just about where you go, it’ll be about the story you build along the way.
+Our project, TravelMate, aims to bridge this gap by creating a travel companion that grows with you — from planning the trip to reliving it afterward. It simplifies travel organization, helps you track your journey in real time, and transforms your memories into an interactive, location-aware diary you can return to anytime. TravelMate isn’t just about where you go, it’ll be about the story you build along the way. This final report summarizes what was completed, what functionality works, and how other developers can reproduce and test the application on their own machines.
 
-#### **Why this project is worth pursuing**
+#### **Why this project is worth pursuing** - Same as proposal
 
 Trip planning and travel journaling are universal activities, yet most existing solutions focus heavily on logistics or booking automation. Apps like TripIt and Wanderlog excel at managing reservations or collaborative planning, but they can feel complex or impersonal for travelers who simply want an easy, creative way to document their own experiences. On the other end, note-taking apps like Apple Notes or Google Keep lack structure, location integration, and the emotional touch that makes travel memories meaningful.
 
@@ -18,7 +18,7 @@ TravelMate fills this middle ground. It combines the essential efficiency of tra
 - Relive trips through a digital memory book that feels like a personal travel timeline.
   Built with React Native and Expo, TravelMate will provide a smooth and consistent experience across iOS and Android, ensuring accessibility and responsiveness even when offline.
 
-#### **Target users**
+#### **Target users** - Same as proposal
 
 Our target users are:
 
@@ -45,33 +45,53 @@ The objective of TravelMate is to build a functional and visually appealing mobi
 
 #### **Core Features**
 
----
+This section explains how TravelMate successfully fulfilled all required core technical requirements.
 
-##### **(1) Navigation Structure**
+##### **(1) React Native and Expo Development**
 
-We will use **Expo Router** to handle navigation between different screens. Expo Router provides a file-based routing system similar to Next.js, making it easier to organize screens and layouts.
+TravelMate was fully implemented using React Native with Expo and written in **TypeScript**. The project was created with create-expo-app and structured using Expo’s recommended TypeScript template. Every component and screen uses TypeScript interfaces for props, state, and navigation types. Core **React Native components** were used throughout the app such as:
+Text, View, Pressable, TextInput, FlatList, ScrollView, Image, etc. **Hooks** such as useState, useEffect, useMemo, and useReducer are used for business logic and UI updates.
 
-**App structure example:**
+All code adheres to TypeScript typing:
+-Trip and Step models
+-Context state and reducer actions
+-Navigation params for dynamic routes
 
+##### **(2) Navigation Structure**
+
+We used **Expo Router** to handle navigation between different screens. Expo Router provides a file-based routing system similar to Next.js, making it easier to organize screens and layouts.
+
+**File-based routing (Expo Router):**
 ```
 app/
- ├── index.tsx           // Home screen
- ├── add-trip.tsx        // Add Trip screen
- ├── trip/[id].tsx       // Trip Details screen (dynamic route)
- ├── schedule/[id].tsx   // Schedule View screen
- ├── _layout.tsx         // Shared layout for navigation bar or header
+ ├── index.tsx
+ ├── trips/create.tsx
+ ├── trips/[id]/index.tsx
+ ├── trips/[id]/add-step.tsx
+ ├── trips/[id]/edit.tsx
+ ├── trips/[id]/steps/[stepId]/edit.tsx
+ ├── notifications/index.tsx
+ ├── settings/index.tsx
+ ├── map/index.tsx
+ ├── _layout.tsx
 ```
+**Dynamic routing**
+We used [id] and [stepId] dynamic segments to navigate to:
+-Specific trips
+```/trips/123```
+-Specific steps within a trip
+```/trips/123/steps/456/edit```
+This satisfies the requirement for data-driven navigation and typed parameters.
 
-- **Home Screen**: Displays all saved trips in a FlatList and shows them on a world map using the Mapbox API.
-- **Add Trip Screen**: Allows users to create new trips with start date, end date, destination, and summary.
-- **Trip Details Screen**: Shows trip details, user-added photos, and additional notes.
-- **Schedule View Screen**: Displays a day-by-day schedule for a selected trip.
-
-Navigation will use **TypeScript typing** for route parameters and props to ensure safety and maintainability. For example, each trip will have a type `Trip` that includes `id`, `title`, `destination`, `startDate`, `endDate`, `summary`, and optional `photoUri`.
-
+**Data passing between screens**
+Trip and step data are retrieved using Context based on the route params. Navigation is implemented by:
+```ts
+router.push(`/trips/${trip.id}`)
+router.push(`/trips/${trip.id}/steps/${step.id}/edit`)
+```
 ---
 
-##### **(2) State Management and Persistence**
+##### **(3) State Management and Persistence**
 
 We will use **React Context API** combined with **useReducer** to manage the global state of trips.
 The state will include:
