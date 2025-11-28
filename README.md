@@ -53,9 +53,10 @@ TravelMate was fully implemented using React Native with Expo and written in **T
 Text, View, Pressable, TextInput, FlatList, ScrollView, Image, etc. **Hooks** such as useState, useEffect, useMemo, and useReducer are used for business logic and UI updates.
 
 All code adheres to TypeScript typing:
--Trip and Step models
--Context state and reducer actions
--Navigation params for dynamic routes
+- Trip and Step models
+- Context state and reducer actions
+- Navigation params for dynamic routes
+---
 
 ##### **(2) Navigation Structure**
 
@@ -76,14 +77,16 @@ app/
  ├── _layout.tsx
 ```
 **Dynamic routing**
+
 We used [id] and [stepId] dynamic segments to navigate to:
--Specific trips
+- Specific trips
 ```/trips/123```
--Specific steps within a trip
+- Specific steps within a trip
 ```/trips/123/steps/456/edit```
 This satisfies the requirement for data-driven navigation and typed parameters.
 
 **Data passing between screens**
+ 
 Trip and step data are retrieved using Context based on the route params. Navigation is implemented by:
 ```ts
 router.push(`/trips/${trip.id}`)
