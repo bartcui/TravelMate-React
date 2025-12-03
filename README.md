@@ -108,7 +108,7 @@ We implemented a central TripContext that stores the entire app’s trip/step st
 
 **Features**:
 
-- Strongly typed reducer actions: ADD_TRIP, UPDATE_TRIP, REMOVE_TRIP, ADD_STEP, UPDATE_STEP, REMOVE_STEP
+- Reducer actions include: ADD_TRIP, UPDATE_TRIP, REMOVE_TRIP, ADD_STEP, UPDATE_STEP, REMOVE_STEP
 - Actions defined as TypeScript unions
 - Global hooks: useTrips() for consuming context 
 
@@ -124,38 +124,42 @@ App reloads, Expo Go restarts, and Device restarts
 
 ---
 
-##### **(3) Notification Setup**
+##### **(4) Notification Setup**
 
-The app implements an **internal notification** system fulfilling the **Expo Notifications** requirement.
+TravelMate implements a full local push notification system using **Expo Notifications**, allowing the app to send real device notifications that appear in the device’s notification bar. The final implementation uses Expo’s native notification scheduling, meaning users receive reminders even if the app is closed.
 
 **Upcoming trip reminders**
 
-- Notify user 3 days before a trip
-- Notify use one week before a trip
-- Notify user when a trip starts today
+Notifications are automatically scheduled when a trip is created or updated. We implemented three reminder rules:
 
-When users tap on a notification, the app will navigate them to the relevant trip detail screen. This feature demonstrates our understanding of scheduling and handling local notifications and user interactions.
+- 1 Day and 3 Days Before Trip Starts. To help users prepare last-minute essentials.
+- Within One Week of Creation. If a new trip is added and its start date is within 7 days, the app immediately schedules: A “trip coming up soon” notification
 
----
+**Device-Level Notification Behaviour**
 
-##### **(4) Backend Integration**
+Once the app is built with EAS:
 
-We will connect our app to a backend service using a **Backend-as-a-Service (BaaS)** platform, most likely **Supabase** or **Firebase**.
-
-Backend responsibilities:
-
-- Store user accounts and authentication data.
-- Store user trip data (optional synchronization with cloud).
-- Support basic CRUD operations for trip plans.
-
-The app will fetch and display live data from the backend, showing user-specific trip lists. We will handle loading and error states gracefully with indicators and retry logic.
-
-This will allow users to sync their trips between devices and keep backups online.
-We will also ensure that the app can still work **offline**, with local persistence as fallback.
+- Notifications appear in the system notification bar
+- Tapping a notification opens the app directly
+- Navigation is routed to the associated trip details (/trips/[id])
 
 ---
 
-##### **(5) Deployment Plan**
+##### **(5) Backend Integration**
+
+TravelMate connects to a cloud backend using **Firebase**, enabling user authentication, cloud syncing, and cross-device persistence.
+
+**Firebase Authentication**
+
+- Handles login
+- Creates a unique user profile for each traveler
+- Allows different users to see their own trips
+- Ensures separation between users’ stored data
+
+TBD
+---
+
+##### **(6) Deployment Plan**
 
 We will build and deploy the app using **Expo EAS Build** for testing.
 Both Android (APK) and iOS (IPA or Expo Go link) test builds will be produced for evaluation.
@@ -199,20 +203,7 @@ Users can visualize their travel routes or see destinations marked globally.
 
 ---
 
-##### **(7) Scope and Feasibility**
-
-The project is designed to be achievable within two months by a two-person team.
-Each feature builds on core React Native and Expo concepts without requiring heavy native development. Expo’s built-in tools for notifications, authentication, and sensors make integration efficient.
-
-We will limit the scope to essential features first—trip CRUD, navigation, state management, and local persistence—before adding enhancements like photos, map, and notifications. This phased approach ensures we can deliver a working app even if advanced features take longer.
-
----
-
-### **3. Tentative Plan**
-
-We will complete the project collaboratively in phases. The development will focus on building a clean, functional MVP first, followed by enhancements and testing.
-
-#### **Planned Responsibilities**
+#### **Contributions**
 
 **Oliver**
 
@@ -236,40 +227,6 @@ Both team members will collaborate on:
 - Reviewing and debugging cross-screen data passing.
 - Writing documentation and preparing the final presentation.
 
-#### **Development Phases (Conceptually)**
-
-1. **Project Setup**
-
-   - Initialize Expo app with TypeScript.
-   - Configure project structure and routing layout.
-   - Set up Context and reducer for managing trips.
-
-2. **Core Functionality**
-
-   - Build screens (Home, Add Trip, Details, Schedule).
-   - Implement CRUD logic for trips.
-   - Persist state using Async Storage.
-
-3. **Backend and Auth**
-
-   - Connect to Supabase or Firebase backend.
-   - Implement Google login with Expo AuthSession.
-   - Sync trips with backend for logged-in users.
-
-4. **Advanced Integrations**
-
-   - Add notifications for upcoming trips.
-   - Integrate camera for adding photos.
-   - Use location API to show trips on map.
-
-5. **Testing and Deployment**
-
-   - Test on both iOS and Android devices.
-   - Fix UI and navigation bugs.
-   - Build and deploy using Expo EAS.
-   - Prepare presentation and documentation.
-
----
 
 #### **Setup the testing env**
 
@@ -279,3 +236,7 @@ npx expo prebuild
 eas build --profile development --platform ios
 npx expo start --dev-client
 ```
+
+### Code Statistics (cloc)
+- **TypeScript (primary source code): 3,142 lines**
+![Line Count](./line%20count.jpg)
