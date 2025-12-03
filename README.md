@@ -161,22 +161,26 @@ TBD
 
 ##### **(6) Deployment Plan**
 
-We will build and deploy the app using **Expo EAS Build** for testing.
-Both Android (APK) and iOS (IPA or Expo Go link) test builds will be produced for evaluation.
+The deployment of TravelMate was carried out using **Expo’s EAS Build** system, which provides a cloud-based pipeline for producing builds for iOS and Android.To prepare the project for deployment, we first initialized EAS within the repository and configured build profiles through the eas.json file. The development profile produced a build containing the Expo Development Client, which allowed us to test native features—including notifications, authentication, and Mapbox map rendering—directly on physical devices while still retaining the ability to use the local Metro bundler. The preview profile was used to generate internal-share builds that could be distributed to teammates or testers without requiring them to run the project locally. Finally, the production profile generated optimized release builds suitable for future submission to mobile app stores.
 
-The deployment steps include:
+As part of the deployment setup, we ran the Expo prebuild process, which generated native ios/ and android/ directories required for integrating custom native modules. EAS handled all necessary mobile credentials automatically. Environment variables such as Firebase configuration keys and the Mapbox API token were injected through EAS Secrets, ensuring that sensitive information was not exposed in the repository. Once the development and preview builds were successfully created, we tested the application on an iOS simulator first to validate critical functionality that is not available in Expo Go, such as scheduled notifications. 
 
-- Configuring EAS project with `eas.json`.
-- Building development and preview builds for device testing.
-- Ensuring the app runs smoothly on both platforms.
+#### **Setup the testing env**
+
+```bash
+npm install
+npx expo prebuild
+eas build --profile development --platform ios
+npx expo start --dev-client
+```
 
 ---
 
 ##### **(6) Advanced Features**
 
-###### **a. User Authentication**
+###### **a. Google OAuth Sign-In**
 
-We will implement **user login and logout** using **Expo AuthSession**, enabling Google login.
+To support personalization and multi-device access, we implemented secure user authentication using Google OAuth through Expo AuthSession. This allows users to log in with their existing Google accounts rather than entering credentials manually. Once authenticated, the user’s profile (name, email, avatar) is retrieved and stored locally, enabling customized experiences such as displaying the user’s name on the Home screen and syncing personalized trip data. Integrating OAuth also lays the foundation for cloud-based syncing of trips in future releases, as each user now has a unique and verifiable identity. 
 
 The login flow:
 
@@ -186,8 +190,6 @@ The login flow:
 4. The token is securely stored using Async Storage.
 5. The app displays personalized data after login.
 
-This fulfills the requirement for secure authentication using a modern OAuth method.
-We chose AuthSession because it’s simple, secure, and easy to integrate with Expo without native dependencies.
 
 ###### **b. Device Camera Integration**
 
@@ -228,15 +230,6 @@ Both team members will collaborate on:
 - Writing documentation and preparing the final presentation.
 
 
-#### **Setup the testing env**
-
-```bash
-npm install
-npx expo prebuild
-eas build --profile development --platform ios
-npx expo start --dev-client
-```
-
 ### Code Statistics (cloc)
 - **TypeScript (primary source code): 3,142 lines**
-![Line Count](./line%20count.jpg)
+![Line Count](./line%20count.JPG)
