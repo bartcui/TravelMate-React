@@ -30,9 +30,7 @@ More specifically, the project seeks to:
 - Build a multi-screen, intuitive travel planner that allows users to create, view, and manage trips within a seamless navigation flow.
 - Fulfill all Core Technical Requirements, including React Navigation, global state handling, persistent storage, notifications, and external service integration.
 - Implement backend connectivity using Firebase, enabling secure user authentication and synchronized storage of trip data.
-- Deliver creative, user-centered enhancements—such as map-based trip visualization, photo journaling, and calendar-based itinerary planning—to elevate the overall travel planning experience.
-
-In summary, TravelMate’s objective is to showcase the ability to build a polished mobile application that combines frontend functionality, backend services, and thoughtful user experience design into a practical travel companion tool.
+- Deliver creative, user-centered enhancements, such as map-based trip visualization, photo journaling, and calendar-based itinerary planning to elevate the overall travel planning experience.
 
 ### **2. Technical Stack**
 
@@ -192,7 +190,7 @@ The Home screen includes an interactive global map implemented using react-nativ
 To streamline date selection for trips and steps, we integrated the react-native-calendars library. This component offers a mobile-friendly calendar interface for choosing start and end dates. It improves both speed and accuracy compared to manual date input.
 
 ---
-### **4. User Guide**
+### **4. User Guide (NEED SCREENSHOTS)**
 This section provides a step-by-step guide to help new users navigate and operate the TravelMate application. The goal is to ensure that any user—regardless of technical background—can easily understand how to register, create trips, add steps, and explore the interactive map features.
 
 #### (1) Login and Account Setup
@@ -217,8 +215,8 @@ Once logged in, users are taken to the Home screen, which serves as the central 
 
 - Interactive Global Map - Displays photos from each recorded trip and step. Locations without photos appear as markers. Users can rotate and zoom the globe to explore all destinations they have added.
 - User Banner - Below the map, the user’s avatar and name are shown. Two icons accompany the banner:
--- Profile Icon - Opens the Profile page for editing user information.
--- Bell Icon - Opens the Notification Center, where upcoming trip reminders are displayed.
+  - Profile Icon - Opens the Profile page for editing user information.
+  - Bell Icon - Opens the Notification Center, where upcoming trip reminders are displayed.
 
 - Trip List Section - For first-time users, this area will be empty. Once trips are created, each trip will appear here in a card format with its name and summary details.
 - Add Trip Button - Allows users to begin planning or recording a trip.
@@ -260,7 +258,41 @@ Returning to the Home screen after adding steps:
 Selecting a photo or marker on the map automatically navigates the user to the specific step detail page for that location, enabling quick access and review. Below the map, all created trips now appear as cards, offering an organized overview of the user’s past, present, and future travels.
 
 ---
-### **5. Development Guide**
+### **5. Development Environment**
+Once the project is cloned from the repository, install TypeScript dependencies using command:
+```
+npm install
+```
+
+This pulls in:
+- React Native / Expo packages
+- Expo Router
+- react-native-maps
+- react-native-calendars
+- Firebase SDK
+- Expo Notifications and related libraries
+- TypeScript and type definitions
+
+#### ***Environment Configuration***
+
+TravelMate relies on a few environment-specific values, such as Mapbox API token, Firebase configuration, OAuth redirect URIs. To configure these, go to Expo App Config
+
+In app.config.js, make sure the expo object includes: "MAPBOX_TOKEN", "googlePlacesApiKey", "iosGoogleMapsApiKey", "androidGoogleMapsApiKey"
+
+In firebaseConfig.ts, make sure all the Firebase keys are there as well.
+
+#### **Local Testing**
+Most of TravelMate’s core functionality was developed and validated using Expo Go. It was used extensively during development to test UI layout, navigation flows and local persistence, before moving to EAS Dev Client and native builds for advanced features such as full Firebase integration.
+
+Within Expo Go, we tested: 
+- Home Screen UI
+- Trip Creation and Editing
+- Trip Details and Steps
+- Navigation and Dynamic Routes
+- Persistence (AsyncStorage)
+- Map Rendering and Geocoding
+
+Using Expo Go for these tests gave us very fast feedback. Only once the core experience was stable in Expo Go did we move to EAS Dev Client and full native builds to validate features that require full native configuration
 
 ---
 ### **6. Deployment Information**
@@ -284,14 +316,14 @@ npx expo start --dev-client
 **Oliver**
 
 - Set up Expo project, TypeScript configuration, and EAS build environment.
-- Implement backend integration (Supabase or Firebase) and authentication (AuthSession) along with User Profile screen.
+- Implement backend integration (Firebase) and authentication (AuthSession) along with User Profile screen.
 - Develop Mapbox integration for displaying trips on the map.
 - Handle Async Storage setup for state persistence.
 - Manage app deployment with Expo EAS and produce final builds.
 
 **Bart**
 
-- Implement the main screens (Home, Add Trip, Trip Details, Schedule, Notification) using React Native core components.
+- Implement the main screens (Home, Add Trip, Trip Details, Schedule, Notification) using React Native components.
 - Design navigation using Expo Router and TypeScript types for props and routes.
 - Build the Context + useReducer architecture for trip state.
 - Implement the camera integration and notification scheduling.
@@ -301,7 +333,7 @@ npx expo start --dev-client
 
 - Testing authentication flow and API calls.
 - Reviewing and debugging cross-screen data passing.
-- Writing documentation and preparing the final presentation.
+- Writing documentation and preparing the presentation.
 
 
 ### Code Statistics (cloc)
