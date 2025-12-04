@@ -1,9 +1,11 @@
 ## **TravelMate – A Trip Planning Mobile App**
 
 ### **Team Information:**
+
 Yijun Chen, 1003045518, liloliver.chen@mail.utoronto.ca
 
 Bart Cui, 1011827908, bart.cui@mail.utoronto.ca
+
 ---
 ### **1. Motivation**
 
@@ -37,6 +39,7 @@ In summary, TravelMate’s objective is to showcase the ability to build a polis
 TravelMate was developed using **React Native using TypeScript** and **Expo** with additional libraries, and cloud services integrated to support navigation, state management, backend authentication, mapping, notifications, and external data sources. The app’s navigation is powered by **Expo Router** and for global application data, Trip and Step information is managed via **React Context** combined with **useReducer**. **AsyncStorage** ensures persistent local data across app reloads and device restarts. Push notifications are implemented using **Expo Notifications**, enabling real device reminders for upcoming trips. **Firebase** is used for authentication and backend connectivity and Google OAuth **Expo AuthSession** for sign-in. **Google Places Autocomplete**, **Mapbox Geocoding**, and **react-native-maps** for location search, geospatial processing, and interactive map visualization. **react-native-calendars** to provide mobile-optimized date selection UI.
 
 In the next Features section, each of these technologies will be discussed in detail, along with how they support specific app functionalities.
+
 ---
 ### **3. Features**
 #### **Core Features**
@@ -151,8 +154,8 @@ TravelMate connects to a cloud backend using **Firebase**, enabling user authent
 - Ensures separation between users’ stored data
 
 TBD
----
 
+---
 
 #### **Advanced Features**
 
@@ -190,6 +193,72 @@ To streamline date selection for trips and steps, we integrated the react-native
 
 ---
 ### **4. User Guide**
+This section provides a step-by-step guide to help new users navigate and operate the TravelMate application. The goal is to ensure that any user—regardless of technical background—can easily understand how to register, create trips, add steps, and explore the interactive map features.
+
+#### (1) Login and Account Setup
+
+When users first open TravelMate, they are greeted with a login screen. Three authentication options are available:
+
+- Create a new account using email and password
+- Sign in with an existing TravelMate account
+- Log in with Google through secure OAuth authentication
+
+After creating an account, users are directed to the profile setup page, where they may:
+
+- Choose an avatar
+- Enter their name and email
+- Set their hometown, which will later appear as a marker on the interactive globe displayed on the Home screen
+
+The profile information can be modified at any time through the Profile tab.
+
+#### (2) Home Screen Overview
+
+Once logged in, users are taken to the Home screen, which serves as the central hub of the application. Key elements of the Home screen include:
+
+- Interactive Global Map - Displays photos from each recorded trip and step. Locations without photos appear as markers. Users can rotate and zoom the globe to explore all destinations they have added.
+- User Banner - Below the map, the user’s avatar and name are shown. Two icons accompany the banner:
+-- Profile Icon - Opens the Profile page for editing user information.
+-- Bell Icon - Opens the Notification Center, where upcoming trip reminders are displayed.
+
+- Trip List Section - For first-time users, this area will be empty. Once trips are created, each trip will appear here in a card format with its name and summary details.
+- Add Trip Button - Allows users to begin planning or recording a trip.
+
+#### (3) Creating a Trip
+
+To begin a new trip, users tap the Add Trip button on the Home screen. This opens the trip creation page, where the user can:
+
+- Enter the trip name
+- Select the start and end dates
+- Choose a visibility setting: Public, Friends-only, Private
+- After submitting the trip information, TravelMate navigates to the Trip Detail page.
+
+#### (4) Adding Steps to a Trip
+
+Each trip consists of multiple steps, representing cities, attractions, or segments of the journey. On the Trip Detail page, users will see:
+
+- The trip start date displayed at the top
+- The trip end date displayed at the bottom
+- An Add Step button centered between them
+
+Tapping Add Step opens the Step Creation page, where users can provide:
+
+- The location of the step (with autocomplete suggestions)
+- The duration
+- A short summary or note
+- Accommodation details
+- Uploaded photos from that location
+
+Each submitted step appears back on the Trip Detail page as a step card. Users can add as many steps as needed until the full trip is planned or documented.
+
+#### (5) Viewing Trips on the Interactive Globe
+
+Returning to the Home screen after adding steps:
+- Any step with uploaded photos will display one of its photos directly on the global map at the corresponding geocoded location.
+- Steps without photos will still appear as location markers.
+- Users may rotate and explore the globe to visually browse their travel history.
+
+Selecting a photo or marker on the map automatically navigates the user to the specific step detail page for that location, enabling quick access and review. Below the map, all created trips now appear as cards, offering an organized overview of the user’s past, present, and future travels.
+
 ---
 ### **5. Development Guide**
 
