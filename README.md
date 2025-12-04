@@ -4,16 +4,16 @@
 Yijun Chen, 1003045518, liloliver.chen@mail.utoronto.ca
 
 Bart Cui, 1011827908, bart.cui@mail.utoronto.ca
-
+---
 ### **1. Motivation**
 
 Traveling is one of the most fulfilling ways to experience life and collecting memories that shape who we are. However, the way we plan and remember trips often feels fragmented. Many travelers still rely on spreadsheets, Google Docs, or notes to organize itineraries and reminders. These tools might work early on, but as the details grow, adding flights, checklists, restaurants, and maps etc, it becomes easy to lose track of everything. Even worse, once the trip begins, these tools rarely evolve into something that captures what the journey felt like. And while photos are the main way we document our experiences, our phone galleries quickly become a chaotic collection of hundreds of unorganized pictures. The emotional context, where the photo was taken, what we felt, who we were with often gets lost. Social media offers a glimpse of the highlights, but not a private, immersive way to revisit our memories.
 
 #### **Existing solutions and limitations**
 
-1. **TripIt** – Automatically builds a master itinerary by importing confirmation emails for flights, hotels, and cars. It's useful for frequent travelers who want to consolidate all their bookings in one place. It's an execllent tool for trip planning but lack of tracking and memory building features.
-2. **Wanderlog** – A full-featured app for group trip planning, it is great for tracking trips with friends. It is overall what we are aiming for but its strong focus on group coordiation might make it sightly too complicated for users who just want to record trips personally.
-3. **Google Maps** – Useful for saving places, and navagating around cities and driving but lacks trip timelines, journaling, or reminders.
+- **TripIt** – Automatically builds a master itinerary by importing confirmation emails for flights, hotels, and cars. It's useful for frequent travelers who want to consolidate all their bookings in one place. It's an execllent tool for trip planning but lack of tracking and memory building features.
+- **Wanderlog** – A full-featured app for group trip planning, it is great for tracking trips with friends. It is overall what we are aiming for but its strong focus on group coordiation might make it sightly too complicated for users who just want to record trips personally.
+- **Google Maps** – Useful for saving places, and navagating around cities and driving but lacks trip timelines, journaling, or reminders.
 
 Our project, TravelMate, aims to bridge this gap by creating a travel companion that grows with you, from planning the trip to reliving it afterward. It simplifies travel organization, helps you track your journey in real time, and transforms your memories into an interactive, location-aware diary you can return to anytime. TravelMate isn’t just about where you go, it’ll be about the story you build along the way. This final report summarizes what was completed, what functionality works, and how other developers can reproduce and test the application on their own machines.
 
@@ -37,8 +37,8 @@ In summary, TravelMate’s objective is to showcase the ability to build a polis
 TravelMate was developed using **React Native using TypeScript** and **Expo** with additional libraries, and cloud services integrated to support navigation, state management, backend authentication, mapping, notifications, and external data sources. The app’s navigation is powered by **Expo Router** and for global application data, Trip and Step information is managed via **React Context** combined with **useReducer**. **AsyncStorage** ensures persistent local data across app reloads and device restarts. Push notifications are implemented using **Expo Notifications**, enabling real device reminders for upcoming trips. **Firebase** is used for authentication and backend connectivity and Google OAuth **Expo AuthSession** for sign-in. **Google Places Autocomplete**, **Mapbox Geocoding**, and **react-native-maps** for location search, geospatial processing, and interactive map visualization. **react-native-calendars** to provide mobile-optimized date selection UI.
 
 In the next Features section, each of these technologies will be discussed in detail, along with how they support specific app functionalities.
-
-### **2. Features**
+---
+### **3. Features**
 #### **Core Features**
 
 ##### **(1) React Native and Expo Development**
@@ -167,7 +167,7 @@ The login flow:
 3. Once the user logs in, an authentication token is returned.
 4. The token is securely stored using Async Storage.
 5. The app displays personalized data that was stored after login.
-
+---
 ##### **(2) Integration with External Services**
 
 To improve accuracy, convenience, and richness of the travel planning experience, TravelMate connects with several powerful external APIs and SDKs.
@@ -189,7 +189,12 @@ The Home screen includes an interactive global map implemented using react-nativ
 To streamline date selection for trips and steps, we integrated the react-native-calendars library. This component offers a mobile-friendly calendar interface for choosing start and end dates. It improves both speed and accuracy compared to manual date input.
 
 ---
-##### **Deployment Plan**
+### **4. User Guide**
+---
+### **5. Development Guide**
+
+---
+### **6. Deployment Information**
 
 The deployment of TravelMate was carried out using **Expo’s EAS Build** system, which provides a cloud-based pipeline for producing builds for iOS and Android.To prepare the project for deployment, we first initialized EAS within the repository and configured build profiles through the eas.json file. The development profile produced a build containing the Expo Development Client, which allowed us to test native features—including notifications, authentication, and Mapbox map rendering—directly on physical devices while still retaining the ability to use the local Metro bundler. The preview profile was used to generate internal-share builds that could be distributed to teammates or testers without requiring them to run the project locally. Finally, the production profile generated optimized release builds suitable for future submission to mobile app stores.
 
@@ -205,7 +210,7 @@ npx expo start --dev-client
 ```
 
 ---
-#### **Contributions**
+### **7. Contributions**
 
 **Oliver**
 
@@ -223,7 +228,7 @@ npx expo start --dev-client
 - Implement the camera integration and notification scheduling.
 - Focus on UI/UX polishing, testing, and bug fixing.
 
-Both team members will collaborate on:
+**Both team members collaborate on**
 
 - Testing authentication flow and API calls.
 - Reviewing and debugging cross-screen data passing.
@@ -233,3 +238,6 @@ Both team members will collaborate on:
 ### Code Statistics (cloc)
 - **TypeScript (primary source code): 3,142 lines**
 ![Line Count](./line%20count.JPG)
+---
+### **8. Lessons Learned and Concluding Remarks**
+
