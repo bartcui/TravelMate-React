@@ -1,31 +1,13 @@
 ## **TravelMate – A Trip Planning Mobile App**
 
-### **1. Introduction**
+### **Team Information:**
+Yijun Chen, 1003045518, liloliver.chen@mail.utoronto.ca
+
+Bart Cui, 1011827908, bart.cui@mail.utoronto.ca
+
+### **1. Motivation**
 
 Traveling is one of the most fulfilling ways to experience life and collecting memories that shape who we are. However, the way we plan and remember trips often feels fragmented. Many travelers still rely on spreadsheets, Google Docs, or notes to organize itineraries and reminders. These tools might work early on, but as the details grow, adding flights, checklists, restaurants, and maps etc, it becomes easy to lose track of everything. Even worse, once the trip begins, these tools rarely evolve into something that captures what the journey felt like. And while photos are the main way we document our experiences, our phone galleries quickly become a chaotic collection of hundreds of unorganized pictures. The emotional context, where the photo was taken, what we felt, who we were with often gets lost. Social media offers a glimpse of the highlights, but not a private, immersive way to revisit our memories.
-
-Our project, TravelMate, aims to bridge this gap by creating a travel companion that grows with you — from planning the trip to reliving it afterward. It simplifies travel organization, helps you track your journey in real time, and transforms your memories into an interactive, location-aware diary you can return to anytime. TravelMate isn’t just about where you go, it’ll be about the story you build along the way. This final report summarizes what was completed, what functionality works, and how other developers can reproduce and test the application on their own machines.
-
-#### **Why this project is worth pursuing** - Same as proposal
-
-Trip planning and travel journaling are universal activities, yet most existing solutions focus heavily on logistics or booking automation. Apps like TripIt and Wanderlog excel at managing reservations or collaborative planning, but they can feel complex or impersonal for travelers who simply want an easy, creative way to document their own experiences. On the other end, note-taking apps like Apple Notes or Google Keep lack structure, location integration, and the emotional touch that makes travel memories meaningful.
-
-TravelMate fills this middle ground. It combines the essential efficiency of travel planners with the personal, story-driven nature of journaling. Users can:
-
-- Create and organize trip plans with destinations, dates, and activities.
-- Capture moments during the trip by adding photos and notes.
-- Automatically connect memories to map locations for an immersive playback.
-- Relive trips through a digital memory book that feels like a personal travel timeline.
-  Built with React Native and Expo, TravelMate will provide a smooth and consistent experience across iOS and Android, ensuring accessibility and responsiveness even when offline.
-
-#### **Target users** - Same as proposal
-
-Our target users are:
-
-- Casual travelers who take weekend getaways or short trips and want a simple, visually appealing travel tracker.
-- Students and young professionals who travel with friends and want to log group experiences without complicated setup.
-- Families or friends who want to preserve vacation memories in an organized, easy-to-revisit format.
-- Solo travelers who enjoy journaling and reflecting on their trips privately.
 
 #### **Existing solutions and limitations**
 
@@ -33,19 +15,31 @@ Our target users are:
 2. **Wanderlog** – A full-featured app for group trip planning, it is great for tracking trips with friends. It is overall what we are aiming for but its strong focus on group coordiation might make it sightly too complicated for users who just want to record trips personally.
 3. **Google Maps** – Useful for saving places, and navagating around cities and driving but lacks trip timelines, journaling, or reminders.
 
-TravelMate will provide the missing middle ground: a lightweight and personal trip organizer that supports photo logging, map visualization, and reminders without requiring a complicated setup.
+Our project, TravelMate, aims to bridge this gap by creating a travel companion that grows with you, from planning the trip to reliving it afterward. It simplifies travel organization, helps you track your journey in real time, and transforms your memories into an interactive, location-aware diary you can return to anytime. TravelMate isn’t just about where you go, it’ll be about the story you build along the way. This final report summarizes what was completed, what functionality works, and how other developers can reproduce and test the application on their own machines.
 
 ---
 
-### **2. Objectives and Key Features**
+### **2. Objectives**
 
-#### **Project Objective**
+The primary objective of TravelMate is to design and develop a fully functional and engaging travel planning application using React Native and Expo. The app aims to meet and exceed all core technical requirements of the course by demonstrating proficiency in multi-screen mobile development, state management, backend integration, and modern mobile UX patterns.
 
-The objective of TravelMate is to build a functional and visually appealing mobile trip planner app using React Native with Expo, meeting all technical requirements of the course. The app will demonstrate the ability to create a multi-screen mobile application that integrates state management, local persistence, notifications, authentication, and a backend connection.
+More specifically, the project seeks to:
 
+- Build a multi-screen, intuitive travel planner that allows users to create, view, and manage trips within a seamless navigation flow.
+- Fulfill all Core Technical Requirements, including React Navigation, global state handling, persistent storage, notifications, and external service integration.
+- Implement backend connectivity using Firebase, enabling secure user authentication and synchronized storage of trip data.
+- Deliver creative, user-centered enhancements—such as map-based trip visualization, photo journaling, and calendar-based itinerary planning—to elevate the overall travel planning experience.
+
+In summary, TravelMate’s objective is to showcase the ability to build a polished mobile application that combines frontend functionality, backend services, and thoughtful user experience design into a practical travel companion tool.
+
+### **2. Technical Stack**
+
+TravelMate was developed using **React Native using TypeScript** and **Expo** with additional libraries, and cloud services integrated to support navigation, state management, backend authentication, mapping, notifications, and external data sources. The app’s navigation is powered by **Expo Router** and for global application data, Trip and Step information is managed via **React Context** combined with **useReducer**. **AsyncStorage** ensures persistent local data across app reloads and device restarts. Push notifications are implemented using **Expo Notifications**, enabling real device reminders for upcoming trips. **Firebase** is used for authentication and backend connectivity and Google OAuth **Expo AuthSession** for sign-in. **Google Places Autocomplete**, **Mapbox Geocoding**, and **react-native-maps** for location search, geospatial processing, and interactive map visualization. **react-native-calendars** to provide mobile-optimized date selection UI.
+
+In the next Features section, each of these technologies will be discussed in detail, along with how they support specific app functionalities.
+
+### **2. Features**
 #### **Core Features**
-
-This section explains how TravelMate successfully fulfilled all required core technical requirements.
 
 ##### **(1) React Native and Expo Development**
 
@@ -159,7 +153,43 @@ TravelMate connects to a cloud backend using **Firebase**, enabling user authent
 TBD
 ---
 
-##### **(6) Deployment Plan**
+
+#### **Advanced Features**
+
+##### **(1) Google OAuth Sign-In**
+
+To support personalization and multi-device access, we implemented secure user authentication using Google OAuth through **Expo AuthSession**. This allows users to log in with their existing Google accounts rather than entering credentials manually. Once authenticated, the user’s profile (name, email, photo) is retrieved and stored locally, enabling customized experiences such as displaying the user’s name on the Home screen and syncing personalized trip data. Integrating OAuth also lays the foundation for cloud-based syncing of trips in future releases, as each user now has a unique and verifiable identity. 
+
+The login flow:
+
+1. The user taps “Login with Google.”
+2. The app opens a browser session using OAuth.
+3. Once the user logs in, an authentication token is returned.
+4. The token is securely stored using Async Storage.
+5. The app displays personalized data that was stored after login.
+
+##### **(2) Integration with External Services**
+
+To improve accuracy, convenience, and richness of the travel planning experience, TravelMate connects with several powerful external APIs and SDKs.
+
+- **Google Places Autocomplete**
+
+During the trip and step creation process, the user often needs to enter city names or specific attractions. Manually typing full place names is slow and prone to errors. To solve this, we integrated Google Places Autocomplete, allowing users to begin typing a location and receive real-time suggestions sourced directly from Google’s database. This not only improves location data accuracy to reflect on the map but also speeds up the planning workflow.
+
+- **Mapbox Geocoding Services**
+
+After selecting a location, TravelMate uses Mapbox Geocoding to convert place names into precise geographic coordinates. These coordinates are used to place the photo from each step on the interactive world map and highlight destinations across all trips on the Home screen. This feature allows TravelMate to represent travel data more accurately on the map in the next point. Mapbox was used for its flexible API and 2500 transactions per day for free tier users is more than enough for this project.
+
+- **react-native-maps** for Interactive Maps
+
+The Home screen includes an interactive global map implemented using react-native-maps. This map displays one photo for each saved trip and their associated steps, giving users an geographical overview of their travel history and upcoming plans. The initial region is set to user's hometown with a zoomed-out view, ensuring that users immediately see where the journey starts. As the user adds more steps and trips, the map dynamically updates, reflecting newly added destinations.
+
+- **react-native-calendars** for Date Selection
+
+To streamline date selection for trips and steps, we integrated the react-native-calendars library. This component offers a mobile-friendly calendar interface for choosing start and end dates. It improves both speed and accuracy compared to manual date input.
+
+---
+##### **Deployment Plan**
 
 The deployment of TravelMate was carried out using **Expo’s EAS Build** system, which provides a cloud-based pipeline for producing builds for iOS and Android.To prepare the project for deployment, we first initialized EAS within the repository and configured build profiles through the eas.json file. The development profile produced a build containing the Expo Development Client, which allowed us to test native features—including notifications, authentication, and Mapbox map rendering—directly on physical devices while still retaining the ability to use the local Metro bundler. The preview profile was used to generate internal-share builds that could be distributed to teammates or testers without requiring them to run the project locally. Finally, the production profile generated optimized release builds suitable for future submission to mobile app stores.
 
@@ -175,36 +205,6 @@ npx expo start --dev-client
 ```
 
 ---
-
-##### **(6) Advanced Features**
-
-###### **a. Google OAuth Sign-In**
-
-To support personalization and multi-device access, we implemented secure user authentication using Google OAuth through Expo AuthSession. This allows users to log in with their existing Google accounts rather than entering credentials manually. Once authenticated, the user’s profile (name, email, avatar) is retrieved and stored locally, enabling customized experiences such as displaying the user’s name on the Home screen and syncing personalized trip data. Integrating OAuth also lays the foundation for cloud-based syncing of trips in future releases, as each user now has a unique and verifiable identity. 
-
-The login flow:
-
-1. The user taps “Login with Google.”
-2. The app opens a browser session using OAuth.
-3. Once the user logs in, an authentication token is returned.
-4. The token is securely stored using Async Storage.
-5. The app displays personalized data after login.
-
-
-###### **b. Device Camera Integration**
-
-The app will allow users to attach photos to their trips using the device camera.
-This will use the expo-camera module, with proper permission handling.
-When creating or viewing a trip, the user can take a photo or select one from the gallery to store as part of the trip record.
-The photo URI will be saved locally or uploaded to the backend, depending on connectivity.
-
-###### **c. Location API**
-
-The Home screen will integrate **expo-location** to show the user’s current location and added trips on a Mapbox map.
-Users can visualize their travel routes or see destinations marked globally.
-
----
-
 #### **Contributions**
 
 **Oliver**
