@@ -30,7 +30,8 @@ More specifically, the project seeks to:
 - Build a multi-screen, intuitive travel planner that allows users to create, view, and manage trips within a seamless navigation flow.
 - Fulfill all Core Technical Requirements, including React Navigation, global state handling, persistent storage, notifications, and external service integration.
 - Implement backend connectivity using Firebase, enabling secure user authentication and synchronized storage of trip data.
-- Deliver creative, user-centered enhancements, such as map-based trip visualization, photo journaling, and calendar-based itinerary planning to elevate the overall travel planning experience.
+- Deliver creativeenhancements, such as map-based trip visualization, photo journaling, and calendar-based itinerary planning to elevate the overall travel planning experience.
+- Deploy and test the app on real mobile devices.
 
 ### **2. Technical Stack**
 
