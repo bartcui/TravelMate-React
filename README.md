@@ -335,10 +335,11 @@ npx expo start --dev-client
 - Reviewing and debugging cross-screen data passing.
 - Writing documentation and preparing the presentation.
 
-
 ### Code Statistics (cloc)
 - **TypeScript (primary source code): 3,142 lines**
 ![Line Count](./line%20count.JPG)
 ---
 ### **8. Lessons Learned and Concluding Remarks**
+The development of TravelMate provided valuable hands-on experience with modern mobile application technologies and allowed our team to meaningfully apply concepts learned throughout the course. One of the most significant learning outcomes was getting familiar with the end-to-end development lifecycle, from designing the UI and implementing features, to handling platform-specific behaviours, and finally preparing the app for deployment. While developing the main features came relatively smoothly, the deployment phase proved to be the most challenging. We encountered repeated issues during EAS build production, including configuration conflicts and native module compatibility. Troubleshooting these problems helped us gain a much deeper understanding of Expo’s build pipeline and configuration files.
 
+Through these challenges, we learned the importance of thorough testing on physical devices, dependency management, and iterative debugging when moving from Expo Go to standalone builds. These lessons not only improved our technical skills but also highlighted the importance of collaborative problem solving.
