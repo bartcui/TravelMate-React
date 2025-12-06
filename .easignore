@@ -7,6 +7,7 @@ build
 android/app/build
 ios/build
 ios/Pods
+/ios
 
 # Metro / bundler cache
 .expo
