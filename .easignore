@@ -4,10 +4,11 @@ node_modules
 # Local build outputs
 dist
 build
+android
 android/app/build
+ios
 ios/build
 ios/Pods
-/ios
 
 # Metro / bundler cache
 .expo
