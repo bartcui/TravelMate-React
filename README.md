@@ -34,6 +34,8 @@ More specifically, the project seeks to:
 - Deliver creativeenhancements, such as map-based trip visualization, photo journaling, and calendar-based itinerary planning to elevate the overall travel planning experience.
 - Deploy and test the app on real mobile devices.
 
+---
+
 ### **3. Technical Stack**
 
 TravelMate was developed using **React Native using TypeScript** and **Expo** with additional libraries, and cloud services integrated to support navigation, state management, backend authentication, mapping, notifications, and external data sources. The app’s navigation is powered by **Expo Router** and for global application data, Trip and Step information is managed via **React Context** combined with **useReducer**. **AsyncStorage** ensures persistent local data across app reloads and device restarts. Push notifications are implemented using **Expo Notifications**, enabling real device reminders for upcoming trips. **Firebase** is used for authentication and backend connectivity and Google OAuth **Expo AuthSession** for sign-in. **Google Places Autocomplete**, **Mapbox Geocoding**, and **react-native-maps** for location search, geospatial processing, and interactive map visualization. **react-native-calendars** to provide mobile-optimized date selection UI.
