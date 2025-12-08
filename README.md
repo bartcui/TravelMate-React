@@ -333,7 +333,7 @@ This pulls in:
 
 TravelMate uses several environment-specific values such as Mapbox access tokens, Firebase configuration, and Google Maps/Places API keys. These values must be configured properly to support both local development builds and Expo EAS production builds.
 
-##### **Local Development (.env)**
+#### **Local Development (.env)**
 
 For local development, all environment variables are stored inside a .env file.
 Expo requires public variables to be prefixed with **EXPO*PUBLIC***, so all runtime configuration values were defined as:
@@ -355,7 +355,7 @@ EXPO_PUBLIC_FIREBASE_APP_ID=...
 
 This ensures a consistent and type-safe configuration experience when working with TypeScript.
 
-##### **Expo EAS Build Configuration**
+#### **Expo EAS Build Configuration**
 
 For **production builds**, all environment variables were uploaded into Expo:
 
@@ -378,7 +378,7 @@ TravelMate’s development workflow relied on a combination of **Expo Go**, **EA
 
 Because several native modules used in this project (e.g., `expo-notifications`, Google Maps SDK, Places Autocomplete) are **not supported in Expo Go**, we conducted our full feature validation using a custom **EAS Dev Client build**. This allowed us to run the app with full native capabilities while still benefiting from fast local iteration.
 
-##### **Testing Workflow**
+#### **Testing Workflow**
 
 **1. Manual Feature Testing in Expo Go (UI-only features)**  
 Expo Go was used early in development to validate high-level UI behavior:
