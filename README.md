@@ -210,6 +210,7 @@ After creating an account, users are directed to the profile setup page, where t
 - Set their hometown, which will later appear as a marker on the interactive globe displayed on the Home screen
 
 The profile information can be modified at any time through the Profile tab.
+
 ![Log In](screenshots/login.JPG)
 ![Set Up](screenshots/setup.JPG)
 ![Set Up Info](screenshots/setup_info.JPG)
