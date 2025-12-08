@@ -212,8 +212,8 @@ After creating an account, users are directed to the profile setup page, where t
 The profile information can be modified at any time through the Profile tab.
 
 ![Log In](screenshots/login.JPG)
-![Set Up](screenshots/setup.JPG)
-![Set Up Info](screenshots/setup_info.JPG)
+![Set Up](screenshots/signup.JPG)
+![Set Up Info](screenshots/signup_info.JPG)
 
 #### (2) Home Screen Overview
 
@@ -226,6 +226,8 @@ Once logged in, users are taken to the Home screen, which serves as the central 
 
 - Trip List Section - For first-time users, this area will be empty. Once trips are created, each trip will appear here in a card format with its name and summary details.
 - Add Trip Button - Allows users to begin planning or recording a trip.
+
+![Home Page](screenshots/homepage)
 
 #### (3) Creating a Trip
 
