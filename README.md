@@ -503,7 +503,9 @@ To test the production APK locally, follow these steps:
 - Open Android Studio → Device Manager； Launch any installed virtual device (e.g., Pixel 7 / Android 14).
 
 2. Install the APK into the Emulator
-   - Drag the .apk file directly onto the emulator window; Android will automatically install it.
+
+- Drag the .apk file directly onto the emulator window; Android will automatically install it.
+
 3. Find TravelMate in the app drawer → run normally.
 
 ---
