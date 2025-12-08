@@ -155,7 +155,7 @@ Once the app is built with EAS:
 
 TravelMate connects to a cloud backend using **Firebase**, enabling secure authentication, cloud syncing, and real-time data updates across devices.
 
-###### **Firebase Authentication**
+##### **Firebase Authentication**
 
 - Supports **Email/Password login** and **Google OAuth sign-in**
 - Automatically creates a **unique user document** for each traveler
