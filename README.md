@@ -227,7 +227,7 @@ Once logged in, users are taken to the Home screen, which serves as the central 
 - Trip List Section - For first-time users, this area will be empty. Once trips are created, each trip will appear here in a card format with its name and summary details.
 - Add Trip Button - Allows users to begin planning or recording a trip.
 
-![Home Page](screenshots/homepage)
+![Home Page](screenshots/homepage.JPG)
 
 #### (3) Creating a Trip
 
@@ -237,6 +237,10 @@ To begin a new trip, users tap the Add Trip button on the Home screen. This open
 - Select the start and end dates
 - Choose a visibility setting: Public, Friends-only, Private
 - After submitting the trip information, TravelMate navigates to the Trip Detail page.
+
+![Create Trip Options](screenshots/create_trip_option.JPG)
+![Create Trip Page](screenshots/create_trip_page.JPG)
+![Trip Detail Page](screenshots/trip_detail.JPG)
 
 #### (4) Adding Steps to a Trip
 
@@ -256,6 +260,9 @@ Tapping Add Step opens the Step Creation page, where users can provide:
 
 Each submitted step appears back on the Trip Detail page as a step card. Users can add as many steps as needed until the full trip is planned or documented.
 
+![New Step](screenshots/new_step.JPG)
+![Trip Detail Updated](screenshots/trip_detail_updated.JPG)
+
 #### (5) Viewing Trips on the Interactive Globe
 
 Returning to the Home screen after adding steps:
@@ -264,6 +271,10 @@ Returning to the Home screen after adding steps:
 - Users may rotate and explore the globe to visually browse their travel history.
 
 Selecting a photo or marker on the map automatically navigates the user to the specific step detail page for that location, enabling quick access and review. Below the map, all created trips now appear as cards, offering an organized overview of the user’s past, present, and future travels.
+
+![Home Page](screenshots/homepage_updated.JPG)
+![Home Page](screenshots/existing_account.JPG)
+![Home Page](screenshots/homepage_account.JPG)
 
 ---
 ### **5. Development Environment**
