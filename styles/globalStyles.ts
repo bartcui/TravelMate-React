@@ -1,7 +1,7 @@
 // styles/globalStyles.ts
 import { StyleSheet } from "react-native";
 import type { Theme } from "./colors";
-import { SCREEN_HEIGHT } from "@/utils/homeUtils";
+import { SCREEN_HEIGHT } from "@/utils/constants";
 
 export const makeGlobalStyles = (t: Theme) =>
   StyleSheet.create({

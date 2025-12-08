@@ -33,7 +33,7 @@ export default function CreateTripScreen() {
     if (!name.trim()) return false;
     if (!startDate) return false;
     return true;
-  }, [name, startDate, endDate]);
+  }, [name, startDate]);
 
   const onCreate = async () => {
     if (!canSubmit || saving) {

@@ -14,7 +14,6 @@ import {
   Text,
   Animated,
   Easing,
-  InteractionManager,
 } from "react-native";
 import { useTrips } from "@/contexts/TripContext";
 import { geocodePlace } from "@/utils/geocode";
@@ -102,21 +101,6 @@ export default function MapPreview() {
 
   const [homeCoord, setHomeCoord] = useState<LatLng | null>(null);
 
-  const [bridgeReady, setBridgeReady] = useState(
-    Platform.OS !== "ios" // Android: render immediately
-  );
-  const isIOSProd = Platform.OS === "ios" && !__DEV__;
-
-  useEffect(() => {
-    if (Platform.OS !== "ios") return;
-
-    const handle = InteractionManager.runAfterInteractions(() => {
-      setBridgeReady(true);
-    });
-
-    return () => handle.cancel();
-  }, []);
-
   // Build a single string like "Toronto, Ontario, Canada" from userDoc
   const homeQuery = useMemo(() => {
     if (!userDoc) return null;
@@ -125,7 +109,7 @@ export default function MapPreview() {
     );
     if (parts.length === 0) return null;
     return parts.join(", ");
-  }, [userDoc?.city, userDoc?.province, userDoc?.country]);
+  }, [userDoc]);
 
   // Geocode the user's city/province/country into a lat/lng
   useEffect(() => {
@@ -197,52 +181,12 @@ export default function MapPreview() {
     mapRef.current.animateToRegion(region, 1500);
   }, [mapReady, markers, homeCoord]);
 
-  const hasValidRegion =
-    region &&
-    typeof region.latitude === "number" &&
-    typeof region.longitude === "number" &&
-    !Number.isNaN(region.latitude) &&
-    !Number.isNaN(region.longitude);
-  // If bridge not ready yet on iOS, show a placeholder instead of mounting MapView
-  if (!bridgeReady || !hasValidRegion) {
-    return (
-      <View
-        style={{
-          height: 200,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text>Loading map…</Text>
-      </View>
-    );
-  }
-
-  if (isIOSProd) {
-    return (
-      <View
-        style={{
-          height: 200,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Text style={{ textAlign: "center" }}>
-          Map preview is disabled in the iOS production simulator build due to a
-          MapKit/react-native-maps crash on this iOS runtime.
-          {"\n\n"}
-          Please run the development build (Expo) to see the interactive map.
-        </Text>
-      </View>
-    );
-  }
-
   return (
     <MapView
       ref={mapRef}
       style={StyleSheet.absoluteFill}
-      provider={Platform.OS === "ios" ? undefined : PROVIDER_GOOGLE}
-      mapType={Platform.OS === "ios" ? "hybridFlyover" : "satellite"}
+      provider={PROVIDER_GOOGLE}
+      mapType={"satellite"}
       onMapReady={() => setMapReady(true)}
       initialRegion={NORTH_AMERICA}
       region={region}

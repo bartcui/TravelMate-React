@@ -1,5 +1,5 @@
 // Home Screen
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import {
   View,
@@ -10,6 +10,8 @@ import {
   StyleSheet,
   Image,
   Animated,
+  PanResponder,
+  Dimensions,
 } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { useColorScheme } from "react-native";
@@ -19,9 +21,18 @@ import { useTrips, getTripStatus, Trip } from "../contexts/TripContext";
 import { useUser } from "../contexts/UserContext";
 import MapPreview from "../components/MapPreview";
 import { getTripAlerts } from "../utils/notifications";
-import { sheetTop, panResponder } from "@/utils/homeUtils";
+import { SCREEN_HEIGHT } from "../utils/constants";
 
 export default function HomeScreen() {
+  // snap *top* positions for the sheet (smaller top => more visible)
+  const TOP_FULL = SCREEN_HEIGHT * 0.1; // sheet fills screen
+  const TOP_MID = SCREEN_HEIGHT * 0.5; // 50% visible
+  const TOP_PEEK = SCREEN_HEIGHT * 0.8; // only ~20% visible
+  const MIN_TOP = TOP_FULL;
+  const MAX_TOP = TOP_PEEK;
+  // Bottom sheet logic
+  const initialTop = TOP_MID; // start at 50%
+
   const scheme = useColorScheme();
   const t = getTheme(scheme);
   const gs = makeGlobalStyles(t);
@@ -35,6 +46,48 @@ export default function HomeScreen() {
   const [pickerOpen, setPickerOpen] = useState(false);
   const { user, baseAvatarUri } = useUser();
   const displayName = user?.displayName || "Traveler";
+
+  const currentTop = useRef(initialTop);
+  const sheetTop = useRef(new Animated.Value(initialTop)).current;
+
+  const snapTo = (targetTop: number) => {
+    Animated.spring(sheetTop, {
+      toValue: targetTop,
+      useNativeDriver: false,
+      bounciness: 4,
+    }).start();
+    currentTop.current = targetTop;
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) =>
+        Math.abs(gestureState.dy) > 5,
+      onPanResponderMove: (_, gestureState) => {
+        const newTop = currentTop.current + gestureState.dy;
+        // clamp between full and peek
+        const clamped = Math.min(Math.max(newTop, MIN_TOP), MAX_TOP);
+        sheetTop.setValue(clamped);
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        const newTop = currentTop.current + gestureState.dy;
+        const clamped = Math.min(Math.max(newTop, MIN_TOP), MAX_TOP);
+
+        // choose closest snap point
+        const candidates = [TOP_FULL, TOP_MID, TOP_PEEK];
+        let best = candidates[0];
+        let bestDist = Math.abs(clamped - best);
+        for (let i = 1; i < candidates.length; i++) {
+          const d = Math.abs(clamped - candidates[i]);
+          if (d < bestDist) {
+            best = candidates[i];
+            bestDist = d;
+          }
+        }
+        snapTo(best);
+      },
+    })
+  ).current;
 
   const sortedTrips = useMemo(() => {
     return [...trips].sort((a, b) => {

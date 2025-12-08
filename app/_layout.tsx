@@ -22,10 +22,10 @@ function Gate({ children }: { children: React.ReactNode }) {
       </View>
     );
   }
-  // console.log("segment:", segments[0]);
-  // console.log("needsOnboarding", needsOnboarding);
-  // console.log("user: ", !!user);
-  // console.log("inAuthGroup: ", inAuthGroup);
+  console.log("segment:", segments[0]);
+  console.log("needsOnboarding", needsOnboarding);
+  console.log("user: ", !!user);
+  console.log("inAuthGroup: ", inAuthGroup);
   // Not logged in and not in auth → go to login
   if (!user && !inAuthGroup) {
     return <Redirect href="/login" />;

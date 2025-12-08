@@ -37,21 +37,14 @@ export default function EditTripScreen() {
   );
   const [saving, setSaving] = useState(false);
 
-  if (!trip) {
-    return (
-      <View style={gs.screen}>
-        <Text style={gs.label}>Trip not found.</Text>
-      </View>
-    );
-  }
-
   const canSubmit = useMemo(() => {
     if (!name.trim()) return false;
     if (!startDate) return false;
     return true;
-  }, [name, startDate, endDate]);
+  }, [name, startDate]);
 
   const onSave = async () => {
+    if (!trip) return;
     if (!canSubmit || saving) {
       Alert.alert("Missing info", "Please fill in name and dates.");
       return;
@@ -75,6 +68,13 @@ export default function EditTripScreen() {
     }
   };
 
+  if (!trip) {
+    return (
+      <View style={gs.screen}>
+        <Text style={gs.label}>Trip not found.</Text>
+      </View>
+    );
+  }
   return (
     <View style={gs.screen}>
       <Text style={gs.h1}>Edit Trip</Text>

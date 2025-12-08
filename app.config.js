@@ -20,9 +20,6 @@ export default ({ config }) => ({
       supportsTablet: true,
       bundleIdentifier: "com.ece1778.travelmate",
       googleServicesFile: "./GoogleService-Info.plist",
-      config: {
-        googleMapsApiKey:  process.env.GOOGLE_MAPS_API_KEY,
-      },
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
       },
@@ -32,11 +29,6 @@ export default ({ config }) => ({
       adaptiveIcon: {
         foregroundImage: "./assets/adaptive-icon.png",
         backgroundColor: "#ffffff",
-      },
-      config: {
-        googleMaps: {
-          apiKey: process.env.GOOGLE_MAPS_API_KEY,
-        },
       },
       edgeToEdgeEnabled: true,
       predictiveBackGestureEnabled: false,
@@ -50,13 +42,12 @@ export default ({ config }) => ({
 
     extra: {
       MAPBOX_TOKEN: process.env.MAPBOX_TOKEN,
-      googlePlacesApiKey: process.env.GOOGLE_MAPS_API_KEY,
+      googlePlacesApiKey: process.env.GOOGLE_MAPS_PLACES,
       router: {},
       eas: {
         projectId: "c410be8c-4ab7-4ac0-8163-8420a6259499",
       },
     },
-
     plugins: [
       "expo-router",
       "@react-native-firebase/app",
@@ -64,10 +55,18 @@ export default ({ config }) => ({
       "expo-notifications",
       "expo-image-picker",
       [
+        "react-native-maps",
+        {
+          "iosGoogleMapsApiKey":  process.env.GOOGLE_MAPS_API_KEY_IOS,
+          "androidGoogleMapsApiKey": process.env.GOOGLE_MAPS_API_KEY_ANDROID,
+        }
+      ],
+      [
         "expo-build-properties",
         {
           ios: {
             useFrameworks: "static",
+            forceStaticLinking: ['RNFBApp'],
             //deploymentTarget: "18.6",
           },
         },

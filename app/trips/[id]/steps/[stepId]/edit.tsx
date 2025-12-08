@@ -35,15 +35,11 @@ export default function EditStepScreen() {
 
   // Look up trip & step (pure values; no early returns!)
   const trip = getTripById(id!);
-  if (!trip)
-    return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
-  if (!user?.uid)
-    return <Text style={{ padding: 16, color: t.text }}>User not found.</Text>;
-
   const step = useMemo(
     () => trip?.steps.find((s) => s.id === stepId),
     [trip, stepId]
   );
+  const hasUser = !!user?.uid;
 
   // Local state: initialize with safe defaults; then hydrate from `step` in an effect
   const [place, setPlace] = useState("");
@@ -81,7 +77,7 @@ export default function EditStepScreen() {
         />
       ),
     });
-  }, []);
+  }, [navigation]);
 
   const onSave = async () => {
     if (!trip || !step || saving) return;
@@ -166,7 +162,7 @@ export default function EditStepScreen() {
     ]);
   };
 
-  const storageBasePath = `users/${user.uid}/trips/${trip.id}/steps-uploads`;
+  const storageBasePath = `users/${user?.uid}/trips/${trip?.id}/steps-uploads`;
 
   // Render fallbacks instead of early-returns to preserve hook order
   if (!trip) {
@@ -182,6 +178,13 @@ export default function EditStepScreen() {
         <Text style={gs.label}>
           Destination not found (it may have been deleted).
         </Text>
+      </View>
+    );
+  }
+  if (!hasUser) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>User not found.</Text>
       </View>
     );
   }

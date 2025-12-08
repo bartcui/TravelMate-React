@@ -39,7 +39,7 @@ export default function LoginScreen() {
       offlineAccess: false, // set true only if you need server auth code
       forceCodeForRefreshToken: false,
     });
-  }, []);
+  }, [WEB_CLIENT_ID]);
 
   // ---------- Google Native Sign-In ----------
   const signInWithGoogleNative = async () => {

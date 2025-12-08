@@ -160,7 +160,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     return () => {
       if (unsub) unsub();
     };
-  }, [user?.uid]);
+  }, [user]);
 
   // Map current photoURL back to avatarId if it matches a preset
   const avatarId = useMemo(() => {

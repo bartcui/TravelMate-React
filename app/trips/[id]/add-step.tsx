@@ -30,10 +30,8 @@ export default function AddStepScreen() {
   const gs = makeGlobalStyles(t);
 
   const trip = getTripById(id!);
-  if (!trip)
-    return <Text style={{ padding: 16, color: t.text }}>Trip not found.</Text>;
-  if (!user?.uid)
-    return <Text style={{ padding: 16, color: t.text }}>User not found.</Text>;
+  const hasUser = !!user?.uid;
+
   // form state
   const [place, setPlace] = useState("");
   const [whereStay, setWhereStay] = useState("");
@@ -47,6 +45,7 @@ export default function AddStepScreen() {
   const canSubmit = useMemo(() => !!place.trim() && !!start, [place, start]);
 
   const onSubmit = async () => {
+    if (!trip || !hasUser) return;
     if (!canSubmit || saving) {
       Alert.alert(
         "Missing info",
@@ -105,8 +104,22 @@ export default function AddStepScreen() {
     }
   };
 
-  const storageBasePath = `users/${user.uid}/trips/${trip.id}/steps-uploads`;
+  const storageBasePath = `users/${user?.uid}/trips/${trip?.id}/steps-uploads`;
 
+  if (!trip) {
+    return (
+      <View style={[gs.screen, { justifyContent: "center" }]}>
+        <Text style={gs.label}>Trip not found.</Text>
+      </View>
+    );
+  }
+  if (!hasUser) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text>User not found.</Text>
+      </View>
+    );
+  }
   return (
     <FlatList
       data={[{ key: "form" }]}

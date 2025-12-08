@@ -24,7 +24,7 @@ export default function TripDetailsScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { getTripById } = useTrips();
+  const { getTripById, removeTrip } = useTrips();
 
   //console.log("tripId", id);
   const trip = getTripById(id!);
@@ -34,10 +34,7 @@ export default function TripDetailsScreen() {
     navigation.setOptions({
       title: trip?.name,
     });
-  }, [trip]);
-
-  //console.log("trip: ", trip);
-  if (!trip) return <Text style={{ padding: 16 }}>Trip not found.</Text>;
+  }, [trip, navigation]);
 
   const [viewerVisible, setViewerVisible] = useState(false);
   const [viewerPhoto, setViewerPhoto] = useState<string | null>(null);
@@ -51,6 +48,9 @@ export default function TripDetailsScreen() {
     setViewerVisible(false);
     setViewerPhoto(null);
   };
+
+  //console.log("trip: ", trip);
+  if (!trip) return <Text style={{ padding: 16 }}>Trip not found.</Text>;
 
   const renderStep = ({ item }: { item: any }) => {
     const start = item.visitedAt ? new Date(item.visitedAt) : null;
@@ -135,7 +135,6 @@ export default function TripDetailsScreen() {
       </Pressable>
     </View>
   );
-  const { removeTrip } = useTrips();
 
   const Footer = () => (
     <View>
