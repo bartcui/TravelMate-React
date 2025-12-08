@@ -492,7 +492,7 @@ One thing to note is that the iOS build uses the 3D Apple Maps, while the Androi
 The final **Android production APK** used in the project is stored in the repository:
 
 📦 **Download APK:**
-[`eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk`](eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk)
+[`eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk.zip`](eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk.zip)
 
 To test the production APK locally, follow these steps:
 
