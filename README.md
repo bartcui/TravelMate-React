@@ -33,14 +33,14 @@ More specifically, the project seeks to:
 - Deliver creativeenhancements, such as map-based trip visualization, photo journaling, and calendar-based itinerary planning to elevate the overall travel planning experience.
 - Deploy and test the app on real mobile devices.
 
-### **2. Technical Stack**
+### **3. Technical Stack**
 
 TravelMate was developed using **React Native using TypeScript** and **Expo** with additional libraries, and cloud services integrated to support navigation, state management, backend authentication, mapping, notifications, and external data sources. The app’s navigation is powered by **Expo Router** and for global application data, Trip and Step information is managed via **React Context** combined with **useReducer**. **AsyncStorage** ensures persistent local data across app reloads and device restarts. Push notifications are implemented using **Expo Notifications**, enabling real device reminders for upcoming trips. **Firebase** is used for authentication and backend connectivity and Google OAuth **Expo AuthSession** for sign-in. **Google Places Autocomplete**, **Mapbox Geocoding**, and **react-native-maps** for location search, geospatial processing, and interactive map visualization. **react-native-calendars** to provide mobile-optimized date selection UI.
 
 In the next Features section, each of these technologies will be discussed in detail, along with how they support specific app functionalities.
 
 ---
-### **3. Features**
+### **4. Features**
 #### **Core Features**
 
 ##### **(1) React Native and Expo Development**
@@ -169,6 +169,7 @@ The login flow:
 3. Once the user logs in, an authentication token is returned.
 4. The token is securely stored using Async Storage.
 5. The app displays personalized data that was stored after login.
+
 ---
 ##### **(2) Integration with External Services**
 
@@ -191,7 +192,7 @@ The Home screen includes an interactive global map implemented using react-nativ
 To streamline date selection for trips and steps, we integrated the react-native-calendars library. This component offers a mobile-friendly calendar interface for choosing start and end dates. It improves both speed and accuracy compared to manual date input.
 
 ---
-### **4. User Guide (NEED SCREENSHOTS)**
+### **5. User Guide**
 This section provides a step-by-step guide to help new users navigate and operate the TravelMate application. The goal is to ensure that any user—regardless of technical background—can easily understand how to register, create trips, add steps, and explore the interactive map features.
 
 #### (1) Login and Account Setup
@@ -209,6 +210,9 @@ After creating an account, users are directed to the profile setup page, where t
 - Set their hometown, which will later appear as a marker on the interactive globe displayed on the Home screen
 
 The profile information can be modified at any time through the Profile tab.
+![Log In](screenshots/login.JPG)
+![Set Up](screenshots/setup.JPG)
+![Set Up Info](screenshots/setup_info.JPG)
 
 #### (2) Home Screen Overview
 
