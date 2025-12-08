@@ -372,6 +372,27 @@ For **production builds**, all environment variables were uploaded into Expo:
 
 Expo automatically injects these variables during the build process, ensuring that no sensitive information is accidentally exposed in the client bundle or version control.
 
+#### **Development Setup**
+Note: the required Credentials (e.g.: .env, google-services.json, GoogleService-Info.plist) to run the project locally are sent to TA
+
+Before running the dev build, you must generate clean native iOS and Android folders:
+
+```bash
+npx expo prebuild --clean
+```
+
+Use EAS to generate a local development build with native support:
+
+```bash
+eas build --profile development --platform ios
+```
+
+After installing the Dev Client, start Metro with Dev Client mode:
+
+```bash
+npx expo start --dev-client
+```
+
 #### **Local Testing**
 
 TravelMate’s development workflow relied on a combination of **Expo Go**, **EAS Dev Client**, and automated tooling such as **expo-doctor** and **ESLint** to ensure stability and correctness throughout the project.
