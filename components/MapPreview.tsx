@@ -185,8 +185,8 @@ export default function MapPreview() {
     <MapView
       ref={mapRef}
       style={StyleSheet.absoluteFill}
-      provider={PROVIDER_GOOGLE}
-      mapType={"satellite"}
+      provider={Platform.OS === "ios" ? undefined : PROVIDER_GOOGLE}
+      mapType={Platform.OS === "ios" ? "hybridFlyover" : "satellite"}
       onMapReady={() => setMapReady(true)}
       initialRegion={NORTH_AMERICA}
       region={region}
