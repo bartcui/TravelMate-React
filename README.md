@@ -7,6 +7,7 @@ Yijun Chen, 1003045518, liloliver.chen@mail.utoronto.ca
 Bart Cui, 1011827908, bart.cui@mail.utoronto.ca
 
 ---
+
 ### **1. Motivation**
 
 Traveling is one of the most fulfilling ways to experience life and collecting memories that shape who we are. However, the way we plan and remember trips often feels fragmented. Many travelers still rely on spreadsheets, Google Docs, or notes to organize itineraries and reminders. These tools might work early on, but as the details grow, adding flights, checklists, restaurants, and maps etc, it becomes easy to lose track of everything. Even worse, once the trip begins, these tools rarely evolve into something that captures what the journey felt like. And while photos are the main way we document our experiences, our phone galleries quickly become a chaotic collection of hundreds of unorganized pictures. The emotional context, where the photo was taken, what we felt, who we were with often gets lost. Social media offers a glimpse of the highlights, but not a private, immersive way to revisit our memories.
@@ -40,7 +41,9 @@ TravelMate was developed using **React Native using TypeScript** and **Expo** wi
 In the next Features section, each of these technologies will be discussed in detail, along with how they support specific app functionalities.
 
 ---
-### **4. Features**
+
+### **3. Features**
+
 #### **Core Features**
 
 ##### **(1) React Native and Expo Development**
@@ -49,9 +52,11 @@ TravelMate was fully implemented using React Native with Expo and written in **T
 Text, View, Pressable, TextInput, FlatList, ScrollView, Image, etc. **Hooks** such as useState, useEffect, useMemo, and useReducer are used for business logic and UI updates.
 
 All code adheres to TypeScript typing:
+
 - Trip and Step models
 - Context state and reducer actions
 - Navigation params for dynamic routes
+
 ---
 
 ##### **(2) Navigation Structure**
@@ -59,6 +64,7 @@ All code adheres to TypeScript typing:
 We used **Expo Router** to handle navigation between different screens. Expo Router provides a file-based routing system similar to Next.js, making it easier to organize screens and layouts.
 
 **File-based routing (Expo Router):**
+
 ```
 app/
  ├── index.tsx
@@ -72,22 +78,26 @@ app/
  ├── map/index.tsx
  ├── _layout.tsx
 ```
+
 **Dynamic routing**
 
 We used [id] and [stepId] dynamic segments to navigate to:
+
 - Specific trips
-```/trips/123```
+  `/trips/123`
 - Specific steps within a trip
-```/trips/123/steps/456/edit```
-This satisfies the requirement for data-driven navigation and typed parameters.
+  `/trips/123/steps/456/edit`
+  This satisfies the requirement for data-driven navigation and typed parameters.
 
 **Data passing between screens**
- 
+
 Trip and step data are retrieved using Context based on the route params. Navigation is implemented by:
+
 ```ts
-router.push(`/trips/${trip.id}`)
-router.push(`/trips/${trip.id}/steps/${step.id}/edit`)
+router.push(`/trips/${trip.id}`);
+router.push(`/trips/${trip.id}/steps/${step.id}/edit`);
 ```
+
 ---
 
 ##### **(3) State Management and Persistence**
@@ -106,7 +116,7 @@ We implemented a central TripContext that stores the entire app’s trip/step st
 
 - Reducer actions include: ADD_TRIP, UPDATE_TRIP, REMOVE_TRIP, ADD_STEP, UPDATE_STEP, REMOVE_STEP
 - Actions defined as TypeScript unions
-- Global hooks: useTrips() for consuming context 
+- Global hooks: useTrips() for consuming context
 
 **AsyncStorage Persistence**
 
@@ -143,16 +153,32 @@ Once the app is built with EAS:
 
 ##### **(5) Backend Integration**
 
-TravelMate connects to a cloud backend using **Firebase**, enabling user authentication, cloud syncing, and cross-device persistence.
+TravelMate connects to a cloud backend using **Firebase**, enabling secure authentication, cloud syncing, and real-time data updates across devices.
 
-**Firebase Authentication**
+###### **Firebase Authentication**
 
-- Handles login
-- Creates a unique user profile for each traveler
-- Allows different users to see their own trips
-- Ensures separation between users’ stored data
+- Supports **Email/Password login** and **Google OAuth sign-in**
+- Automatically creates a **unique user document** for each traveler
+- Ensures each user can only access **their own trips and photos**
+- Provides persistent sessions so users remain logged in across app restarts
 
-TBD
+##### **Cloud Firestore (Database)**
+
+- Stores all **trips, destinations, steps, and uploaded photos**
+- Enables **real-time syncing**, so edits appear instantly across devices
+- Uses Firebase security rules to ensure **user-level data isolation**
+
+##### **Photo Storage**
+
+- Uses Firebase Storage to upload and store trip photos
+- Saves download URLs in Firestore for fast retrieval
+- Supports both **gallery uploads** and **in-app photo updates**
+
+##### **Notifications Backend**
+
+- Integrates Firebase Cloud Messaging (FCM) to send push notifications
+- Works together with expo-notifications for local reminders (e.g., upcoming trips)
+- Ensures device tokens are saved per user for future server-driven notifications
 
 ---
 
@@ -160,7 +186,7 @@ TBD
 
 ##### **(1) Google OAuth Sign-In**
 
-To support personalization and multi-device access, we implemented secure user authentication using Google OAuth through **Expo AuthSession**. This allows users to log in with their existing Google accounts rather than entering credentials manually. Once authenticated, the user’s profile (name, email, photo) is retrieved and stored locally, enabling customized experiences such as displaying the user’s name on the Home screen and syncing personalized trip data. Integrating OAuth also lays the foundation for cloud-based syncing of trips in future releases, as each user now has a unique and verifiable identity. 
+To support personalization and multi-device access, we implemented secure user authentication using Google OAuth through **Expo AuthSession**. This allows users to log in with their existing Google accounts rather than entering credentials manually. Once authenticated, the user’s profile (name, email, photo) is retrieved and stored locally, enabling customized experiences such as displaying the user’s name on the Home screen and syncing personalized trip data. Integrating OAuth also lays the foundation for cloud-based syncing of trips in future releases, as each user now has a unique and verifiable identity.
 
 The login flow:
 
@@ -171,6 +197,7 @@ The login flow:
 5. The app displays personalized data that was stored after login.
 
 ---
+
 ##### **(2) Integration with External Services**
 
 To improve accuracy, convenience, and richness of the travel planning experience, TravelMate connects with several powerful external APIs and SDKs.
@@ -192,7 +219,9 @@ The Home screen includes an interactive global map implemented using react-nativ
 To streamline date selection for trips and steps, we integrated the react-native-calendars library. This component offers a mobile-friendly calendar interface for choosing start and end dates. It improves both speed and accuracy compared to manual date input.
 
 ---
-### **5. User Guide**
+
+### **4. User Guide**
+
 This section provides a step-by-step guide to help new users navigate and operate the TravelMate application. The goal is to ensure that any user—regardless of technical background—can easily understand how to register, create trips, add steps, and explore the interactive map features.
 
 #### (1) Login and Account Setup
@@ -221,6 +250,7 @@ Once logged in, users are taken to the Home screen, which serves as the central 
 
 - Interactive Global Map - Displays photos from each recorded trip and step. Locations without photos appear as markers. Users can rotate and zoom the globe to explore all destinations they have added.
 - User Banner - Below the map, the user’s avatar and name are shown. Two icons accompany the banner:
+
   - Profile Icon - Opens the Profile page for editing user information.
   - Bell Icon - Opens the Notification Center, where upcoming trip reminders are displayed.
 
@@ -266,6 +296,7 @@ Each submitted step appears back on the Trip Detail page as a step card. Users c
 #### (5) Viewing Trips on the Interactive Globe
 
 Returning to the Home screen after adding steps:
+
 - Any step with uploaded photos will display one of its photos directly on the global map at the corresponding geocoded location.
 - Steps without photos will still appear as location markers.
 - Users may rotate and explore the globe to visually browse their travel history.
@@ -277,13 +308,17 @@ Selecting a photo or marker on the map automatically navigates the user to the s
 ![Home Page](screenshots/homepage_account.JPG)
 
 ---
+
 ### **5. Development Environment**
+
 Once the project is cloned from the repository, install TypeScript dependencies using command:
+
 ```
 npm install
 ```
 
 This pulls in:
+
 - React Native / Expo packages
 - Expo Router
 - react-native-maps
@@ -292,57 +327,198 @@ This pulls in:
 - Expo Notifications and related libraries
 - TypeScript and type definitions
 
-#### ***Environment Configuration***
+#### **Environment Configuration**
 
-TravelMate relies on a few environment-specific values, such as Mapbox API token, Firebase configuration, OAuth redirect URIs. To configure these, go to Expo App Config
+TravelMate uses several environment-specific values such as Mapbox access tokens, Firebase configuration, and Google Maps/Places API keys. These values must be configured properly to support both local development builds and Expo EAS production builds.
 
-In app.config.js, make sure the expo object includes: "MAPBOX_TOKEN", "googlePlacesApiKey", "iosGoogleMapsApiKey", "androidGoogleMapsApiKey"
+##### **Local Development (.env)**
 
-In firebaseConfig.ts, make sure all the Firebase keys are there as well.
+For local development, all environment variables are stored inside a .env file.
+Expo requires public variables to be prefixed with **EXPO*PUBLIC***, so all runtime configuration values were defined as:
 
-#### **Local Testing**
-Most of TravelMate’s core functionality was developed and validated using Expo Go. It was used extensively during development to test UI layout, navigation flows and local persistence, before moving to EAS Dev Client and native builds for advanced features such as full Firebase integration.
+```ini
+EXPO_PUBLIC_MAPBOX_TOKEN=...
+EXPO_PUBLIC_GOOGLE_PLACES_API_KEY=...
+EXPO_PUBLIC_IOS_GOOGLE_MAPS_API_KEY=...
+EXPO_PUBLIC_ANDROID_GOOGLE_MAPS_API_KEY=...
 
-Within Expo Go, we tested: 
-- Home Screen UI
-- Trip Creation and Editing
-- Trip Details and Steps
-- Navigation and Dynamic Routes
-- Persistence (AsyncStorage)
-- Map Rendering and Geocoding
+EXPO_PUBLIC_FIREBASE_API_KEY=...
+EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+EXPO_PUBLIC_FIREBASE_PROJECT_ID=...
+EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET=...
+EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=...
+EXPO_PUBLIC_FIREBASE_APP_ID=...
 
-Using Expo Go for these tests gave us very fast feedback. Only once the core experience was stable in Expo Go did we move to EAS Dev Client and full native builds to validate features that require full native configuration
-
----
-### **6. Deployment Information**
-
-The deployment of TravelMate was carried out using **Expo’s EAS Build** system, which provides a cloud-based pipeline for producing builds for iOS and Android.To prepare the project for deployment, we first initialized EAS within the repository and configured build profiles through the eas.json file. The development profile produced a build containing the Expo Development Client, which allowed us to test native features—including notifications, authentication, and Mapbox map rendering—directly on physical devices while still retaining the ability to use the local Metro bundler. The preview profile was used to generate internal-share builds that could be distributed to teammates or testers without requiring them to run the project locally. Finally, the production profile generated optimized release builds suitable for future submission to mobile app stores.
-
-As part of the deployment setup, we ran the Expo prebuild process, which generated native ios/ and android/ directories required for integrating custom native modules. EAS handled all necessary mobile credentials automatically. Environment variables such as Firebase configuration keys and the Mapbox API token were injected through EAS Secrets, ensuring that sensitive information was not exposed in the repository. Once the development and preview builds were successfully created, we tested the application on an iOS simulator first to validate critical functionality that is not available in Expo Go, such as scheduled notifications. 
-
-#### **Setup the testing env**
-
-```bash
-npm install
-npx expo prebuild
-eas build --profile development --platform ios
-npx expo start --dev-client
 ```
 
+This ensures a consistent and type-safe configuration experience when working with TypeScript.
+
+##### **Expo EAS Build Configuration**
+
+For **production builds**, all environment variables were uploaded into Expo:
+
+- **Public environment values**
+  (e.g., Firebase config, Mapbox token, and other non-sensitive values)
+  → uploaded as **plain text variables** in Expo.
+
+- **Sensitive API keys** such as:
+
+  - Google Maps API key
+  - Google Places Autocomplete key
+  - iOS & Android Google Maps SDK keys
+    → stored securely as **Expo Secrets**.
+
+Expo automatically injects these variables during the build process, ensuring that no sensitive information is accidentally exposed in the client bundle or version control.
+
+#### **Local Testing**
+
+TravelMate’s development workflow relied on a combination of **Expo Go**, **EAS Dev Client**, and automated tooling such as **expo-doctor** and **ESLint** to ensure stability and correctness throughout the project.
+
+Because several native modules used in this project (e.g., `expo-notifications`, Google Maps SDK, Places Autocomplete) are **not supported in Expo Go**, we conducted our full feature validation using a custom **EAS Dev Client build**. This allowed us to run the app with full native capabilities while still benefiting from fast local iteration.
+
+##### **Testing Workflow**
+
+**1. Manual Feature Testing in Expo Go (UI-only features)**  
+Expo Go was used early in development to validate high-level UI behavior:
+
+- Home screen layout & theming
+- Trip creation, editing, and deletion
+- Trip details & step management UI
+- Navigation flows and dynamic routes
+- Local state persistence via AsyncStorage
+- Map preview rendering (mocked for Expo Go)
+- Form validation and interactive components
+
+Expo Go enabled rapid iteration during early UI prototyping before introducing native modules.
+
 ---
+
+**2. Manual / Feature Testing in EAS Dev Client (full native support)**  
+Once native packages were added, testing moved to **EAS Dev Client**, where we verified all features requiring device-level integration:
+
+- Google Maps rendering (iOS + Android)
+- Google Places Autocomplete search
+- Firebase Authentication (Email + Google OAuth)
+- Firestore real-time reads/writes
+- Push notifications & scheduling (expo-notifications + FCM)
+- Calendar pickers and gesture-based components
+- Photo Gallery Picker with native media access permissions
+
+This testing ensured compatibility across both platforms before preparing production builds.
+
+---
+
+**3. Automated Environment / Project Health Checks**
+
+To maintain project reliability, we ran:
+
+- **`expo-doctor`**  
+  Ensured all native modules, config files, and package versions were correctly aligned for EAS builds.
+
+- **ESLint Integration**  
+  We added ESLint rules with:
+  - `eslint-plugin-react-hooks` (ensuring correct hook usage)
+  - Custom rules for business logic consistency and code quality
+  - Prettier for formatting consistency
+
+This helped us catch improper dependency arrays, unsafe hook patterns, unused variables, and maintain clean TypeScript throughout the codebase.
+
+### **4. Native Testing in Xcode & Android Studio (production build validation)**
+
+To prepare for App Store / Play Store readiness, we built and tested the **production APP and APK** in native IDEs:
+
+#### **Xcode (iOS)**
+
+- Installed the production `.app` on emulator
+- Debugged provisioning profile & certificate signing issues
+- Validated Google Maps initialization and iOS SDK key injection
+- Monitored runtime logs for crashes, missing permissions, or bundle errors
+- Ensured push notifications work under production APNs environment
+
+#### **Android Studio (Android)**
+
+- Tested production `.apk` on emulators and Pixel devices
+- Validated native module loading & Google Maps Android API key injection
+- Checked splash screen behavior and asset loading
+- Captured logcat errors for build/signature issues
+- Verified deep links, intents, and location permissions
+
+This layer of testing ensured that the final build matched real production conditions and surfaced issues not visible in development mode.
+
+---
+
+### **6. Deployment Information**
+
+The deployment of TravelMate was carried out using **Expo’s EAS Build**, which provides a cloud-based pipeline for producing builds for iOS and Android.
+
+To prepare the project for deployment, we first initialized EAS within the repository and configured build profiles through the eas.json file. The development profile produced a build containing the Expo Development Client, which allowed us to test native features—including notifications, authentication, and Mapbox map rendering—directly on physical devices while still retaining the ability to use the local Metro bundler. The preview profile was used to generate internal-share builds that could be distributed to teammates or testers without requiring them to run the project locally. Finally, the production profile generated optimized release builds suitable for future submission to mobile app stores.
+
+As part of the deployment setup, we ran the Expo prebuild process, which generated native ios/ and android/ directories required for integrating custom native modules. EAS handled all necessary mobile credentials automatically. Environment variables such as Google Maps Api keys and the Mapbox API token were injected through EAS Secrets, ensuring that sensitive information was not exposed in the repository.
+
+Example `eas.json` structure used in the project:
+
+```json
+{
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+
+    "production": {
+      "developmentClient": false,
+      "distribution": "store",
+      "ios": {
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    }
+  }
+}
+```
+
+##### **Final Build Output**
+
+One thing to note is that the iOS build uses the 3D Apple Maps, while the Android build uses the 2D Google Maps SDK, so users may see slight visual differences compared to screenshots in the user guide.
+
+The final **Android production APK** used in the project is stored in the repository:
+
+📦 **Download APK:**
+[`eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk`](eas_build/application-a7eb9953-2046-474a-bd4d-8a3a2af01a60.apk)
+
+To test the production APK locally, follow these steps:
+
+1. Start an Android Emulator
+   1.1 Open Android Studio → Device Manager； Launch any installed virtual device (e.g., Pixel 7 / Android 14).
+2. Install the APK into the Emulator
+   2.1 Drag the .apk file directly onto the emulator window; Android will automatically install it.
+3. Find TravelMate in the app drawer → run normally.
+
+---
+
 ### **7. Contributions**
 
 **Oliver**
 
 - Set up Expo project, TypeScript configuration, and EAS build environment.
 - Implement backend integration (Firebase) and authentication (AuthSession) along with User Profile screen.
-- Develop Mapbox integration for displaying trips on the map.
-- Handle Async Storage setup for state persistence.
+- Develop react-native-maps integration for displaying trips on the map.
+- Implemented full notification support, including local notification configuration, backend handlers, and FCM integration, and added the ability for users to upload and manage trip photos.
+- Enhanced the overall user experience by integrating react-native-calendars for date selection and Google Places Autocomplete for fast, accurate location search, significantly improving usability and workflow smoothness.
 - Manage app deployment with Expo EAS and produce final builds.
 
 **Bart**
 
 - Implement the main screens (Home, Add Trip, Trip Details, Schedule, Notification) using React Native components.
+- Handle Async Storage setup for state persistence.
 - Design navigation using Expo Router and TypeScript types for props and routes.
 - Build the Context + useReducer architecture for trip state.
 - Implement the camera integration and notification scheduling.
@@ -355,10 +531,14 @@ npx expo start --dev-client
 - Writing documentation and preparing the presentation.
 
 ### Code Statistics (cloc)
-- **TypeScript (primary source code): 3,142 lines**
-![Line Count](./line%20count.JPG)
----
-### **8. Lessons Learned and Concluding Remarks**
-The development of TravelMate provided valuable hands-on experience with modern mobile application technologies and allowed our team to meaningfully apply concepts learned throughout the course. One of the most significant learning outcomes was getting familiar with the end-to-end development lifecycle, from designing the UI and implementing features, to handling platform-specific behaviours, and finally preparing the app for deployment. While developing the main features came relatively smoothly, the deployment phase proved to be the most challenging. We encountered repeated issues during EAS build production, including configuration conflicts and native module compatibility. Troubleshooting these problems helped us gain a much deeper understanding of Expo’s build pipeline and configuration files.
 
-Through these challenges, we learned the importance of thorough testing on physical devices, dependency management, and iterative debugging when moving from Expo Go to standalone builds. These lessons not only improved our technical skills but also highlighted the importance of collaborative problem solving.
+- **TypeScript (primary source code): 3,142 lines**
+  ![Line Count](./line%20count.JPG)
+
+---
+
+### **8. Lessons Learned and Concluding Remarks**
+
+The development of TravelMate provided valuable hands-on experience with modern mobile application technologies and allowed our team to meaningfully apply concepts learned throughout the course. One of the most significant learning outcomes was getting familiar with the end-to-end development lifecycle, from designing the UI and implementing features, to handling platform-specific behaviours, and finally preparing the app for deployment. While developing the main features came relatively smoothly, the deployment phase proved to be the most challenging. We ran into several issues during EAS production builds, including configuration conflicts, native module compatibility, and a particularly difficult blocker caused by React hook rule violations. These errors did not appear in local development or Expo Go, so the builds kept failing without clear logs. After integrating ESLint with the react-hooks plugin, we were finally able to surface the incorrect hook usage, fix the dependency issues, and successfully produce a working production build.
+
+Through these challenges, we learned the importance of testing on physical devices, using automated tools like expo-doctor and ESLint, and consistently validating behavior when moving from Expo Go to EAS Dev Client and full native builds. These experiences not only improved our technical understanding of the Expo ecosystem but also reinforced the value of careful debugging, dependency management, and collaborative problem-solving throughout the development cycle.
