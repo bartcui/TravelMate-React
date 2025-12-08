@@ -525,6 +525,7 @@ To test the production APK locally, follow these steps:
 
 2. Install the APK into the Emulator
 
+- download the zip and extract it. Find the .apk file under the zipped folder.
 - Drag the .apk file directly onto the emulator window; Android will automatically install it.
 
 3. Find TravelMate in the app drawer → run normally.
