@@ -44,7 +44,7 @@ In the next Features section, each of these technologies will be discussed in de
 
 ---
 
-### **3. Features**
+### **4. Features**
 
 #### **Core Features**
 
@@ -222,7 +222,7 @@ To streamline date selection for trips and steps, we integrated the react-native
 
 ---
 
-### **4. User Guide**
+### **5. User Guide**
 
 This section provides a step-by-step guide to help new users navigate and operate the TravelMate application. The goal is to ensure that any user—regardless of technical background—can easily understand how to register, create trips, add steps, and explore the interactive map features.
 
@@ -311,7 +311,7 @@ Selecting a photo or marker on the map automatically navigates the user to the s
 
 ---
 
-### **5. Development Environment**
+### **6. Development Environment**
 
 Once the project is cloned from the repository, install TypeScript dependencies using command:
 
@@ -425,11 +425,11 @@ To maintain project reliability, we ran:
 
 This helped us catch improper dependency arrays, unsafe hook patterns, unused variables, and maintain clean TypeScript throughout the codebase.
 
-### **4. Native Testing in Xcode & Android Studio (production build validation)**
+**4. Native Testing in Xcode & Android Studio (production build validation)**
 
 To prepare for App Store / Play Store readiness, we built and tested the **production APP and APK** in native IDEs:
 
-#### **Xcode (iOS)**
+**Xcode (iOS)**
 
 - Installed the production `.app` on emulator
 - Debugged provisioning profile & certificate signing issues
@@ -437,7 +437,7 @@ To prepare for App Store / Play Store readiness, we built and tested the **produ
 - Monitored runtime logs for crashes, missing permissions, or bundle errors
 - Ensured push notifications work under production APNs environment
 
-#### **Android Studio (Android)**
+**Android Studio (Android)**
 
 - Tested production `.apk` on emulators and Pixel devices
 - Validated native module loading & Google Maps Android API key injection
@@ -449,7 +449,7 @@ This layer of testing ensured that the final build matched real production condi
 
 ---
 
-### **6. Deployment Information**
+### **7. Deployment Information**
 
 The deployment of TravelMate was carried out using **Expo’s EAS Build**, which provides a cloud-based pipeline for producing builds for iOS and Android.
 
@@ -506,7 +506,7 @@ To test the production APK locally, follow these steps:
 
 ---
 
-### **7. Contributions**
+### **8. Contributions**
 
 **Oliver**
 
@@ -539,7 +539,7 @@ To test the production APK locally, follow these steps:
 
 ---
 
-### **8. Lessons Learned and Concluding Remarks**
+### **9. Lessons Learned and Concluding Remarks**
 
 The development of TravelMate provided valuable hands-on experience with modern mobile application technologies and allowed our team to meaningfully apply concepts learned throughout the course. One of the most significant learning outcomes was getting familiar with the end-to-end development lifecycle, from designing the UI and implementing features, to handling platform-specific behaviours, and finally preparing the app for deployment. While developing the main features came relatively smoothly, the deployment phase proved to be the most challenging. We ran into several issues during EAS production builds, including configuration conflicts, native module compatibility, and a particularly difficult blocker caused by React hook rule violations. These errors did not appear in local development or Expo Go, so the builds kept failing without clear logs. After integrating ESLint with the react-hooks plugin, we were finally able to surface the incorrect hook usage, fix the dependency issues, and successfully produce a working production build.
 
